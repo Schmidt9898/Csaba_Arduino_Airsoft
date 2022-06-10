@@ -42,6 +42,53 @@ bool did_gyroscope_move(){
 	#endif
 };
 
+enum Mini_game_state{
+	Unknown=0, Good=1, Bad=5
+};
+
+
+struct Mini_game{
+	int act;		//pin dont change
+	int isReadenable;	//pin dont change
+	int signal;			//pin dont change
+	bool solved;		//true if it is solved
+	//bool isactivated;		//true if is activated
+
+	void init(){
+		pinMode(act,OUTPUT);
+		digitalWrite(act,LOW);
+
+		pinMode(isReadenable,INPUT);
+		pinMode(signal,INPUT);
+	}
+
+
+	Mini_game_state get_state(){
+		if(solved)
+			return Mini_game_state::Good;
+		
+		if(digitalRead(isReadenable)){
+			if(digitalRead(signal)){
+				solved=true;
+				deactivate();
+				return Mini_game_state::Good;
+			}else
+				return Mini_game_state::Bad;
+		}else{
+			return Mini_game_state::Unknown;
+		}
+
+	};
+	void activate(){
+		if(!solved)
+			digitalWrite(act,HIGH);
+	}
+	void deactivate(){
+		digitalWrite(act,LOW);
+	}
+
+
+};
 
 
 
