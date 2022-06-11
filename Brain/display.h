@@ -49,6 +49,30 @@ struct LED {
 };
 
 
+
+//üdvözlés,
+//kártya elfogadva
+//kód elfogadva indulnak a játékok
+//sikeres megoldás
+//sikertelen megoldás
+//feladatok kész kérem a végső kódot
+//végső kód kész
+//zene
+//mozgas
+//most lehet játszani
+
+#define m_welcome 0
+#define m_card_accept 1
+#define m_pin_accept 2
+#define m_passed_game 3
+#define m_failed_game 4
+#define m_all_game_passed 5
+#define m_defusing_complete 6
+#define m_music 7
+#define m_move 8
+#define m_game_start 9
+
+
 int music_start_pin;
 void init_music_player(int start_pin,int n){
 	music_start_pin=start_pin;

@@ -1,22 +1,56 @@
 #ifndef S_CLOCK
 #define S_CLOCK
 
+
+#define five_day_in_sec 432000
+
+long detention_end;
+
+extern int time_morning;
+extern int time_night;
+
+
+
+String time_to_string(uint32_t sec)
+{
+	uint32_t min =sec/60; 
+	uint32_t hour =min/60;  
+	return String(hour)+":"+String(min%60)+":"+String(sec%60);
+}
+
 struct  Clock
 {
 	//long time = 0; //in sec
-	unsigned int sec=0;
+	uint32_t sec=0;
+	Clock(int data,int reset)
+	{
+		//TODO
+	}
+	
+	
+	
 	void refresh(){
 		#ifdef DEMO
-		sec =(millis()+72000000)/1000;
+		sec = 28790+millis()/1000;
 		#else
 		sec=0;
 		#endif
 	};
-	int get_time(){
+	String get_time(){
 		//some offset
-		int min =sec/60; 
-		return min/60*100+min%60;
+		uint32_t min =sec/60; 
+		uint32_t hour =min/60; 
+		//uint32_t day =min/60; 
+		//uint32_t  =min/60; 
+		return String(hour%24)+":"+String(min%60)+":"+String(sec%60);
+		//return min/60*1000+min%60;
 	};
+	bool isDay(){
+		uint32_t min =sec/60; 
+		uint32_t hour =min/60; 
+		return hour>=time_morning && hour<time_night;
+	}
+
 };
 //TODO
 //time till date
@@ -43,7 +77,7 @@ bool did_gyroscope_move(){
 };
 
 enum Mini_game_state{
-	Unknown=0, Good=1, Bad=5
+	Unknown=0, Good=1, Bad=2,Already_done=3
 };
 
 
@@ -65,7 +99,7 @@ struct Mini_game{
 
 	Mini_game_state get_state(){
 		if(solved)
-			return Mini_game_state::Good;
+			return Mini_game_state::Already_done;
 		
 		if(digitalRead(isReadenable)){
 			if(digitalRead(signal)){
