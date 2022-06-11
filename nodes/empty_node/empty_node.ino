@@ -3,12 +3,12 @@
 
 
 #define ready 5
-#define output 11
-#define activate 12
+#define bad 11
+#define good 12
 
 //#define MEDIUM 512
 
-//int output_val=1024;
+//int bad_val=1024;
 bool is_set=false;
 void setup()
 {
@@ -19,11 +19,11 @@ void setup()
 	pinMode(ready, OUTPUT);
 	digitalWrite(ready, HIGH);
 
-	pinMode(activate, OUTPUT);
-	digitalWrite(activate, LOW);
+	pinMode(good, OUTPUT);
+	digitalWrite(good, LOW);
 
-	pinMode(output, OUTPUT);
-	digitalWrite(output, LOW);
+	pinMode(bad, OUTPUT);
+	digitalWrite(bad, LOW);
 }
 
 
@@ -34,18 +34,16 @@ void loop()
 		if (!digitalRead(btn_1))
 		{
 			is_set=true;
-			digitalWrite(activate, LOW);
-			digitalWrite(output, HIGH);
-			digitalWrite(activate, HIGH);
-			Serial.println(HIGH);
+			digitalWrite(bad,LOW);
+			digitalWrite(good, HIGH);
+			while(1);
 		}
 		else if(!digitalRead(btn_2))
 		{
 			is_set=true;
-			digitalWrite(activate, LOW);
-			digitalWrite(output, LOW);
-			digitalWrite(activate, HIGH);
-			Serial.println(LOW);
+			digitalWrite(bad,HIGH);
+			digitalWrite(good, LOW);
+			while(1);
 		}
 	}
 }

@@ -3,10 +3,22 @@
 
 
 #include <Wire.h> 
+
+
+
+
+#ifdef DEMO
 #include <LiquidCrystal_I2C.h>
+	LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
+#else
+	//CSABA
+	#include <LiquidCrystal.h>
+	LiquidCrystal lcd(34, 35, 36, 37, 38, 39);
+#endif   
 
 
-LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
+
+
 
 void lcd_init()
 {
@@ -18,7 +30,6 @@ void lcd_init()
 	//lcd.setCursor(0,1);
 	//lcd.print("masodik sor");
 	#else
-	//CSABA
 	#endif    
 }
 
@@ -70,7 +81,7 @@ struct LED {
 #define m_defusing_complete 6
 #define m_music 7
 #define m_move 8
-#define m_game_start 9
+#define m_cant_play 9
 
 
 int music_start_pin;

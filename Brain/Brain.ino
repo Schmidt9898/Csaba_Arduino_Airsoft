@@ -12,6 +12,9 @@
 #define MOTION_SENSOR 6
 #define PIROTECH A0
 
+#define card_reader_input_pin 3
+#define card_reader_activate_pin 2
+
 #include <EEPROM.h>
 
 #include "log.h"
@@ -40,8 +43,8 @@ int time_night=20;
 
 //these wariables need saave to eeprom
 //uint32_t countdown_time=200;
-byte progress=0;//TODO save
-//	1bit empty 1 bit detention,2 bit sate, 4 bit games, 
+byte progress=0;//TODO saveMOTION_SENSOR
+//	1bit popszeg 1 bit detention,2 bit sate, 4 bit games, 
 //	10100101
 //	00000100 1<<2
 //	00000100
@@ -53,7 +56,7 @@ byte progress=0;//TODO save
 
 LED leds[4];
 Mini_game mini_games[4];
-
+Gyoscope gyro;
 
 void setup()
 {
@@ -70,11 +73,18 @@ void setup()
 
 
 	lcd_init();
+	gyro.init();
+
 	init_music_player(40,1);		
 	pinMode(MOTION_SENSOR, INPUT);//may need resistor 10k
 	pinMode(PIROTECH, OUTPUT);//bomba
+	pinMode(card_reader_input_pin, INPUT);
+	pinMode(card_reader_activate_pin, OUTPUT); //HIGH is accept
+	digitalWrite(card_reader_activate_pin,LOW);
+
 	digitalWrite(PIROTECH,LOW);
-	init_gyroscope();
+	
+
 	
 	
 		
@@ -148,7 +158,8 @@ void setup()
 
 	//tone(52, 1000,200);
 
-
+	if(state != State::Detention)
+		switch_state(state);
 }
 
 
@@ -164,11 +175,16 @@ void explosion_loop();
 
 
 
+
+long next_music_play_time=180000;//3 min
+
+
 void loop()
 {
 // state independent tasks
 clock.refresh();
-	log("Time is: "+clock.get_time());
+	//log("Time is: "+clock.get_time());
+	log("T-"+time_to_string(time_of_detonation-clock.sec));
 if(time_of_detonation<=clock.sec)
 {
 	//well boom
@@ -176,12 +192,36 @@ if(time_of_detonation<=clock.sec)
 }
 
 
-	if(did_gyroscope_move())
+	if(gyro.did_gyroscope_move())
 	{
 		//TODO
 		log("elmozdultam");
+		add_penalty();
+		switch_state(State::Detention);
+
+
 	}
-	//lcd_write((String)state,clock.get_time());
+
+if(clock.isDay() && detect_motion())
+{
+
+	if(state==State::Detention)
+		play_music(m_cant_play);
+	else{
+		play_music(m_welcome);
+		next_music_play_time=millis()+180000;
+	}
+}
+
+if(clock.isDay() && state!= State::Detention)
+{
+	if(next_music_play_time<millis())
+	{
+		play_music(m_music);
+		next_music_play_time=millis()+300000;
+	}
+}
+
 
 //state switch
 switch (state)
@@ -221,9 +261,23 @@ if(digitalRead(MOTION_SENSOR))
 
 void switch_state(State next){
 	if(next == state)
-		return;
-	
+		{
+			log("SAME STATE");
+		//return;
+		}
+
 	//leave state events
+	if(state==State::Day)
+	{
+		for(int i=0;i<4;i++)
+			mini_games[i].deactivate();
+	}
+	if(state==State::Wait_card)
+	{
+		digitalWrite(card_reader_activate_pin,LOW);
+	}
+
+	
 	State from = state;//save last state
 	state=next;
 
@@ -240,20 +294,17 @@ void switch_state(State next){
 			case State::Night: 
 				log("Entering Night");
 				lcd_write("Night");
-				for(int i=0;i<4;i++)
-					mini_games[i].deactivate();
 				enter_night_from_state=from;
 				break;
 			case State::Wait_card: 
 				log("Entering Wait_card");
+				digitalWrite(card_reader_activate_pin,HIGH);
 				break;
 			case State::Wait_pin: 
 				log("Entering Wait_pin");
 				break;
 			case State::Detention: 
 				log("Entering Detention");
-				for(int i=0;i<4;i++)
-					mini_games[i].deactivate();
 				enter_detention_from_state=from;
 				break;
 		}
@@ -322,7 +373,16 @@ void card_loop(){
 				switch_state(State::Night);
 				return;
 			}
+		
+
+		if(digitalRead(card_reader_input_pin))
+		{
+		//all good, save state and next phase
 		switch_state(State::Wait_pin);
+		progress = progress | 1<<4;//todo save eeprom
+		}
+
+
 }
 void pinpad_loop(){
 		log("Wait_pin");//TODO
@@ -334,6 +394,7 @@ void pinpad_loop(){
 				return;
 			}
 		switch_state(State::Day);
+		progress = progress | 1<<5;//todo save eeprom
 }
 void final_pinpad_loop(){
 		log("final pinpad loop");//TODO
@@ -345,6 +406,8 @@ void final_pinpad_loop(){
 				return;
 			}
 		//switch_state(State::Day);
+		//progress = 255;//todo save eeprom
+
 }
 
 
@@ -355,6 +418,8 @@ void add_penalty(){
 	{
 		time_of_detonation-=penalty_time;
 	}
+
+	
 	//save this time in eeprom
 }
 void detention_loop(){
@@ -374,6 +439,19 @@ void detention_loop(){
 
 
 
+long next_motion_detect_time=0;
+bool detect_motion()
+{
+	if(digitalRead(MOTION_SENSOR))
+	{
+		if(next_motion_detect_time<millis())
+		{
+		next_motion_detect_time=millis()+900000;
+		return true;
+		}
+	}
+	return false;
+}
 
 
 
