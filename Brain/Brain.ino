@@ -6,13 +6,14 @@
 #ifdef DEMO
 #define penalty_time_barrier 3599 
 #else
-#define penalty_time_barrier 432000 
+#define penalty_time_barrier 3599
+//#define penalty_time_barrier three_day_in_sec  
 #endif
 
 #define MOTION_SENSOR A2
 #define PIROTECH A0
 
-#define BUZZER 14
+#define BUZZER 49
 
 #define card_reader_input_pin 3
 #define card_reader_activate_pin 2
@@ -40,7 +41,7 @@ uint32_t time_of_detonation; // time of detonation, save it in eeprom can't chan
 
 Clock clock;
 int time_morning=8;
-int time_night=22;
+int time_night=23;
 
 const String first_pass="0000";
 const String final_pass="1111";
@@ -112,16 +113,16 @@ void setup()
 	{
 		time_of_detonation = 1655142221;
 		log(String(time_of_detonation,2));
-		detention_end=300;
-		progress=0b00001110;
+		detention_end=0;
+		progress=0b00111110;
 		save_detention_end_time();
 		save_detonation_time();
 		save_progress();
 		beep(1);
 		delay(100000);
 	}
-	
-*/
+	*/
+
 
 
 	//load eeprom data
@@ -139,7 +140,13 @@ void setup()
 
 	gyro.init();
 
-	init_music_player(40,1);		
+	init_music_player();	
+
+  //play_music(4);
+ 
+
+
+
 	pinMode(MOTION_SENSOR, INPUT);//may need resistor 10k
 	pinMode(PIROTECH, OUTPUT);//bomba
 	pinMode(card_reader_input_pin, INPUT);
@@ -190,6 +197,7 @@ log("Start");
 if(!(progress & 1<<7))
 {
 	log("wait for first start");
+  lcd_write("1 min to save");
 	delay(60000);
 	//first start 
 	//kell idő a beüzemelésre , lecsavarozásra és elhagyásra
@@ -323,7 +331,9 @@ if(clock.isDay() && detect_motion())
 {
 
 	if(state==State::Detention)
-		play_music(m_cant_play);
+		{
+    //play_music(m_cant_play);
+		  }
 	else{
 		play_music(m_welcome);
 		lcd_write("Udvozollek!");
@@ -626,6 +636,9 @@ void final_pinpad_loop(){
 
 void add_penalty(){
 	detention_end=clock.sec+detention_time;
+ //log(time_of_detonation-clock.sec);
+ //log("####");
+ //log(penalty_time);
 	if(time_of_detonation-clock.sec > penalty_time_barrier)
 	{
 		time_of_detonation-=penalty_time;

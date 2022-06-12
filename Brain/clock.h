@@ -3,7 +3,8 @@
 
 #include <Wire.h> 
 
-#define five_day_in_sec 432000
+#define three_day_in_sec 259200
+//#define three_day_in_sec 3600
 
 uint32_t detention_end=0;
 

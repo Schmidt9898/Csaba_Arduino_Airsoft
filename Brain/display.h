@@ -118,32 +118,31 @@ struct LED {
 //mozgas
 //most lehet játszani
 
-#define m_welcome 0
-#define m_card_accept 1
-#define m_pass_good 2
-#define m_passed_attempt 3
-#define m_failed_attempt 4
-#define m_all_game_passed 5
-#define m_defusing_complete 6
-#define m_music 7
-#define m_move 8
-#define m_cant_play 9
+#define m_welcome A0
+#define m_card_accept A1
+#define m_pass_good A2
+#define m_passed_attempt A3
+#define m_failed_attempt A4
+#define m_all_game_passed A5
+#define m_defusing_complete A6
+#define m_music A7
+#define m_move A8
+//#define m_cant_play A9
 
 
 int music_start_pin;
-void init_music_player(int start_pin,int n){
-	music_start_pin=start_pin;
-	for (int i=start_pin;i<start_pin+n;i++)
-	{
+void init_music_player(){
+	
+	
 		pinMode(i, OUTPUT);
-		digitalWrite(i,LOW);
-	}
+		digitalWrite(i,HIGH);
+
 }
 void play_music(int i){
-	i+=music_start_pin;
-	digitalWrite(i,HIGH);
-	delay(100);
+	//i+=music_start_pin;
 	digitalWrite(i,LOW);
+	delay(100);
+	digitalWrite(i,HIGH);
 }
 //may add stop pin function
 
