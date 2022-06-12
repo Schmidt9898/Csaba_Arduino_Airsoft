@@ -110,7 +110,7 @@ void setup()
 	//log("detonation time before save: "+time_to_string(time_of_detonation));
 	/*
 	{
-		time_of_detonation = 72300;
+		time_of_detonation = 1655142221;
 		log(String(time_of_detonation,2));
 		detention_end=300;
 		progress=0b00001110;
