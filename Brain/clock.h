@@ -22,7 +22,7 @@ String time_to_string(uint32_t sec)
 #ifdef DEMO
 #else
 #include  <virtuabotixRTC.h>  //Library used
-virtuabotixRTC myRTC(10, 11, 12); //If you change the wiring change the pins here also
+virtuabotixRTC myRTC(21,5,4); //If you change the wiring change the pins here also
 #endif
 
 struct	Clock

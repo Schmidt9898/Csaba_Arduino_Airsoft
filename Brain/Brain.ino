@@ -1,6 +1,6 @@
 
 
-#define DEMO
+/*#define DEMO*/
 #define DEBUG  //comment this line out if you dont want log, also can reduce programsize
 
 #ifdef DEMO
@@ -38,7 +38,7 @@ uint32_t penalty_time = 3600; //in second this will subtract from time 1 hour
 uint32_t time_of_detonation; // time of detonation, save it in eeprom can't change here
 //uint32_t time_of_detonation = 1657908000; // time of detonation, save it in eeprom do not change 
 
-Clock clock(4,5);
+Clock clock;
 int time_morning=8;
 int time_night=20;
 
@@ -85,6 +85,10 @@ struct Keypad{
 	}
 }keypad;
 #else
+#include <Keypad.h>
+
+const int ROWS = 4, COLS = 3;
+
 char keys[ROWS][COLS] = {
   {'1', '2', '3'},
   {'4', '5', '6'},
