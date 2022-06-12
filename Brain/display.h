@@ -69,8 +69,8 @@ void led_segment(uint32_t sec)
 	sec%=60;	//2 digit	
 
 	#ifdef DEMO
-	//log("T-"+String(hour)+":"+String(min)+":"+String(sec));
 	#else
+	//log("T-"+String(hour)+":"+String(min)+":"+String(sec));
 	lc.clearDisplay(0);
 
 	lc.setDigit(0,7, hour/100 % 10	,false);//balról
@@ -154,8 +154,9 @@ void init_music_player(){
 }
 void play_music(int i){
 	//i+=music_start_pin;
+ //log("HEEEEEEEEEEEEE");
 	digitalWrite(i,LOW);
-	delay(100);
+	delay(200);
 	digitalWrite(i,HIGH);
 }
 //may add stop pin function

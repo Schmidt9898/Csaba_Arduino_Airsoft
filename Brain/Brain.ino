@@ -6,12 +6,12 @@
 #ifdef DEMO
 #define penalty_time_barrier 3599 
 #else
-#define penalty_time_barrier 3599
-//#define penalty_time_barrier three_day_in_sec  
+//#define penalty_time_barrier 3599
+#define penalty_time_barrier three_day_in_sec  
 #endif
 
 #define MOTION_SENSOR A2
-#define PIROTECH A0
+#define PIROTECH 48
 
 #define BUZZER 49
 
@@ -33,7 +33,7 @@ State state;
 State enter_detention_from_state;
 State enter_night_from_state;
 
-uint32_t detention_time = 10; //in second
+uint32_t detention_time = 1800; //in second
 uint32_t penalty_time = 3600; //in second this will subtract from time 1 hour
 // 2022.07.15 20:00:00 prepare to meet your doom
 uint32_t time_of_detonation; // time of detonation, save it in eeprom can't change here
@@ -41,14 +41,13 @@ uint32_t time_of_detonation; // time of detonation, save it in eeprom can't chan
 
 Clock clock;
 int time_morning=8;
-int time_night=23;
+int time_night=20;
 
 const String first_pass="0000";
 const String final_pass="1111";
 String input_password=""; //don't change
 
-//these wariables need saave to eeprom
-//uint32_t countdown_time=200;
+
 byte progress=0;
 //	1bit popszeg 1 bit detention,2 bit sate, 4 bit games, 
 //	10100101
@@ -111,10 +110,10 @@ void setup()
 	//log("detonation time before save: "+time_to_string(time_of_detonation));
 	/*
 	{
-		time_of_detonation = 1655142221;
+		time_of_detonation = 1655142221; // ide írd az időt
 		log(String(time_of_detonation,2));
 		detention_end=0;
-		progress=0b00111110;
+		progress=0b00000000;
 		save_detention_end_time();
 		save_detonation_time();
 		save_progress();
@@ -134,6 +133,8 @@ void setup()
 
 
 	lcd_init();
+ //lcd_write("ez egy szoveg","ez a masik");
+ //delay(100000);
 	lcd_write("initializing"," .........");
 	led_segment_init();
 	led_segment(0);//may remove
@@ -310,8 +311,8 @@ clock.refresh();
 	{
 		next_log_time=millis()+1000; //TODO change to 500
 		led_segment(time_of_detonation-clock.sec);
-		//log(String(time_of_detonation));
-		//log("time:"+time_to_string(clock.sec)+"     T-"+time_to_string(time_of_detonation-clock.sec));
+		//log("det time :"+String(time_of_detonation));
+		//log("time:"+String(clock.sec)+"     T-"+time_to_string(time_of_detonation-clock.sec));
 	}
 if(time_of_detonation<=clock.sec)
 {
@@ -325,6 +326,7 @@ if(time_of_detonation<=clock.sec)
 		log("elmozdultam");
 		add_penalty();
 		switch_state(State::Detention);
+   play_music(m_move);
 	}
 
 if(clock.isDay() && detect_motion())
@@ -489,6 +491,7 @@ void day_loop(){
 				log("game state is bad");
 				add_penalty();
 				switch_state(State::Detention);
+       play_music(m_failed_attempt);
 				return;
 			}
 			else{
