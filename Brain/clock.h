@@ -5,7 +5,7 @@
 
 #define five_day_in_sec 432000
 
-long detention_end;
+uint32_t detention_end=0;
 
 extern int time_morning;
 extern int time_night;
@@ -19,14 +19,20 @@ String time_to_string(uint32_t sec)
 	return String(hour)+":"+String(min%60)+":"+String(sec%60);
 }
 
+#ifdef DEMO
+#else
+#include  <virtuabotixRTC.h>  //Library used
+virtuabotixRTC myRTC(10, 11, 12); //If you change the wiring change the pins here also
+#endif
+
 struct	Clock
 {
-	//long time = 0; //in sec
+	//uint32_t time = 0; //in sec
 	uint32_t sec=0;
-	Clock(int data,int reset)
+	/*Clock(int data,int reset)
 	{
-		//TODO
-	}
+		
+	}*/
 	
 	
 	
@@ -34,6 +40,59 @@ struct	Clock
 		#ifdef DEMO
 		sec = 28790+millis()/1000;
 		#else
+ 		myRTC.updateTime();
+
+		
+  		Serial.print(myRTC.year);             //You can switch between day and month if you're using American system
+  		Serial.print("/");
+  		Serial.print(myRTC.month);
+  		Serial.print("/");
+  		Serial.print(myRTC.dayofmonth);
+  		Serial.print(" ");
+  		Serial.print(myRTC.hours);
+  		Serial.print(":");
+  		Serial.print(myRTC.minutes);
+  		Serial.print(":");
+  		Serial.println(myRTC.seconds);
+
+/*
+time_t makeTime(const tmElements_t &tm){   
+// assemble time elements into time_t 
+// note year argument is offset from 1970 (see macros in time.h to convert to other formats)
+// previous version used full four digit year (or digits since 2000),i.e. 2009 was 2009 or 9
+  
+  int i;
+  uint32_t seconds;
+
+  // seconds from 1970 till 1 jan 00:00:00 of the given year
+  seconds= tm.Year*(SECS_PER_DAY * 365);
+  for (i = 0; i < tm.Year; i++) {
+    if (LEAP_YEAR(i)) {
+      seconds += SECS_PER_DAY;   // add extra days for leap years
+    }
+  }
+  
+  // add days for this year, months start from 1
+  for (i = 1; i < tm.Month; i++) {
+    if ( (i == 2) && LEAP_YEAR(tm.Year)) { 
+      seconds += SECS_PER_DAY * 29;
+    } else {
+      seconds += SECS_PER_DAY * monthDays[i-1];  //monthDay array starts from 0
+    }
+  }
+  seconds+= (tm.Day-1) * SECS_PER_DAY;
+  seconds+= tm.Hour * SECS_PER_HOUR;
+  seconds+= tm.Minute * SECS_PER_MIN;
+  seconds+= tm.Second;
+  return (time_t)seconds; 
+}
+*/
+
+
+
+
+
+
 		sec=0;
 		#endif
 	};
@@ -75,8 +134,8 @@ struct Mini_game{
 		pinMode(act,OUTPUT);
 		digitalWrite(act,LOW);
 
-		pinMode(isReadenable,INPUT);
-		pinMode(signal,INPUT);
+		pinMode(good_pin,INPUT);
+		pinMode(bad_pin,INPUT);
 	}
 
 
@@ -114,7 +173,7 @@ const int MPU = 0x68;
 //int Tmp, AcX, AcY, AcZ, GyX, GyY, GyZ, ujX, ujY;
 int AcX, AcY, ujX, ujY;
 bool first=true;
-long stop_detection=0;
+uint32_t stop_detection=0;
 
 void init(){
 	//Wire.begin();
