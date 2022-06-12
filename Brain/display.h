@@ -132,10 +132,24 @@ struct LED {
 
 int music_start_pin;
 void init_music_player(){
-	
-	
-		pinMode(i, OUTPUT);
-		digitalWrite(i,HIGH);
+	pinMode(A0, OUTPUT);
+	digitalWrite(A0,HIGH);
+	pinMode(A1, OUTPUT);
+	digitalWrite(A1,HIGH);
+	pinMode(A2, OUTPUT);
+	digitalWrite(A2,HIGH);
+	pinMode(A3, OUTPUT);
+	digitalWrite(A3,HIGH);
+	pinMode(A4, OUTPUT);
+	digitalWrite(A4,HIGH);
+	pinMode(A5, OUTPUT);
+	digitalWrite(A5,HIGH);
+	pinMode(A6, OUTPUT);
+	digitalWrite(A6,HIGH);
+	pinMode(A7, OUTPUT);
+	digitalWrite(A7,HIGH);
+	pinMode(A8, OUTPUT);
+	digitalWrite(A8,HIGH);
 
 }
 void play_music(int i){
