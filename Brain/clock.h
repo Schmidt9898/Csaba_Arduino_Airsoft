@@ -22,10 +22,10 @@ String time_to_string(uint32_t sec)
 #ifdef DEMO
 #else
 #include  <virtuabotixRTC.h>  //Library used
-virtuabotixRTC myRTC(21,5,4); //If you change the wiring change the pins here also
+virtuabotixRTC myRTC(6,5,4); //If you change the wiring change the pins here also
 
-//short month[12]={31,28,31,30,31,30,31,31,30,31,30,31};
-short month[12]={31,59,90,120,151,181,211,242,272,303,333,364};
+//short month[12]={31,28,31,30 ,31 ,30 ,31 ,31 ,30 ,31 ,30 ,31};
+uint16_t month[12]={31,59,90,120,151,181,211,242,272,303,333,364};
 					
 #endif
 
@@ -45,18 +45,36 @@ struct	Clock
 		sec = 28790+millis()/1000;
 		#else
  		myRTC.updateTime();
-
-		
-  		//Serial.print(myRTC.year);             //You can switch between day and month if you're using American system
-
+/*
+	Serial.print("Jelenlegi dátum / Idő: ");
+  Serial.print(myRTC.year);             //You can switch between day and month if you're using American system
+  Serial.print("/");
+  Serial.print(myRTC.month);
+  Serial.print("/");
+  Serial.print(myRTC.dayofmonth);
+  Serial.print(" ");
+  Serial.print(myRTC.hours);
+  Serial.print(":");
+  Serial.print(myRTC.minutes);
+  Serial.print(":");
+  Serial.println(myRTC.seconds);
+  */
+  		
+//log("--->: "+String(myRTC.month));
+//log("......: "+String(month[(myRTC.month-2)]));
 		sec = month[(myRTC.month-2)];
 		if(myRTC.dayofmonth>1)
 		sec+=myRTC.dayofmonth-1;
+   //log("napok: "+String(sec));
 
 		sec=sec*24;//hours
+    //log("orak: "+String(sec));
 		sec+=myRTC.hours;
 		sec=sec*60 + myRTC.minutes;
-		sec=sec*60 + myRTC.seconds + 1640995200;
+		sec=sec*60 + myRTC.seconds;
+    //log("just sec: "+String(sec));
+    sec+= 1640995200;
+    //log("all sec "+String(sec));
 		//2022 = 1640995200
 		#endif
 	};
@@ -66,12 +84,13 @@ struct	Clock
 		uint32_t hour =min/60; 
 		//uint32_t day =min/60; 
 		//uint32_t	=min/60; 
-		return String(hour%24)+":"+String(min%60)+":"+String(sec%60);
+		return String(myRTC.hours)+":"+String(myRTC.minutes)+":"+String(myRTC.seconds);
 		//return min/60*1000+min%60;
 	};
 	bool isDay(){
-		uint32_t min =sec/60; 
-		uint32_t hour =min/60; 
+		//uint32_t min =myRTC.hours; 
+		uint32_t hour =myRTC.hours; 
+    //log("hour "+String(myRTC.hours));
 		return hour>=time_morning && hour<time_night;
 	}
 
@@ -140,7 +159,7 @@ bool first=true;
 uint32_t stop_detection=0;
 
 void init(){
-	//Wire.begin();
+	Wire.begin();
 	Wire.beginTransmission(MPU);
 	Wire.write(0x6B);
 	Wire.write(0);
@@ -193,14 +212,14 @@ bool did_gyroscope_move(){
 			return false;
 		}
 		bool val=true;
-
-		if (AcX - 1000 < ujX and ujX < AcX + 1000 and AcY - 1000 < ujY and ujY < AcY + 1000 )
+		if (AcX - 5000 < ujX and ujX < AcX + 5000 and AcY - 5000 < ujY and ujY < AcY + 5000 )
 		{
 		val=false;
 		}else{
 			first=true;
 			stop_detection=millis()+6000;
 		}
+//log("gyro val: "+String(val)+" , "+String(AcX)+" , "+String(AcY)+" , "+String(ujX)+" , "+String(ujY));
 		AcX=ujX;
 		AcY=ujY;
 

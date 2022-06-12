@@ -9,7 +9,7 @@
 #define penalty_time_barrier 432000 
 #endif
 
-#define MOTION_SENSOR 6
+#define MOTION_SENSOR A2
 #define PIROTECH A0
 
 #define BUZZER 14
@@ -40,10 +40,10 @@ uint32_t time_of_detonation; // time of detonation, save it in eeprom can't chan
 
 Clock clock;
 int time_morning=8;
-int time_night=20;
+int time_night=22;
 
-const String first_pass="aaaa";
-const String final_pass="aaaa";
+const String first_pass="0000";
+const String final_pass="1111";
 String input_password=""; //don't change
 
 //these wariables need saave to eeprom
@@ -302,8 +302,8 @@ clock.refresh();
 	{
 		next_log_time=millis()+1000; //TODO change to 500
 		led_segment(time_of_detonation-clock.sec);
-		log(String(time_of_detonation));
-		log("time:"+time_to_string(clock.sec)+"     T-"+time_to_string(time_of_detonation-clock.sec));
+		//log(String(time_of_detonation));
+		//log("time:"+time_to_string(clock.sec)+"     T-"+time_to_string(time_of_detonation-clock.sec));
 	}
 if(time_of_detonation<=clock.sec)
 {
@@ -380,11 +380,18 @@ if(digitalRead(MOTION_SENSOR))
 void switch_state(State next){
 	if(next == state)
 		{
-			log("SAME STATE");
+			log("SAME STATE");      
 		//return;
 		}
 
 	//leave state events
+    if(state==State::Detention && next == State::Detention)
+    {
+      return;
+    }
+
+
+  
 	if(state==State::Day)
 	{
 		for(int i=0;i<4;i++)
