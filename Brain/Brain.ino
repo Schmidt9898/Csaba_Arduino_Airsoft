@@ -87,7 +87,7 @@ struct Keypad{
 #else
 #include <Keypad.h>
 
-const int ROWS = 4, COLS = 3;
+const byte ROWS = 4, COLS = 3;
 
 char keys[ROWS][COLS] = {
   {'1', '2', '3'},

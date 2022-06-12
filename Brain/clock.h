@@ -23,6 +23,10 @@ String time_to_string(uint32_t sec)
 #else
 #include  <virtuabotixRTC.h>  //Library used
 virtuabotixRTC myRTC(21,5,4); //If you change the wiring change the pins here also
+
+//short month[12]={31,28,31,30,31,30,31,31,30,31,30,31};
+short month[12]={31,59,90,120,151,181,211,242,272,303,333,364};
+					
 #endif
 
 struct	Clock
@@ -43,57 +47,17 @@ struct	Clock
  		myRTC.updateTime();
 
 		
-  		Serial.print(myRTC.year);             //You can switch between day and month if you're using American system
-  		Serial.print("/");
-  		Serial.print(myRTC.month);
-  		Serial.print("/");
-  		Serial.print(myRTC.dayofmonth);
-  		Serial.print(" ");
-  		Serial.print(myRTC.hours);
-  		Serial.print(":");
-  		Serial.print(myRTC.minutes);
-  		Serial.print(":");
-  		Serial.println(myRTC.seconds);
+  		//Serial.print(myRTC.year);             //You can switch between day and month if you're using American system
 
-/*
-time_t makeTime(const tmElements_t &tm){   
-// assemble time elements into time_t 
-// note year argument is offset from 1970 (see macros in time.h to convert to other formats)
-// previous version used full four digit year (or digits since 2000),i.e. 2009 was 2009 or 9
-  
-  int i;
-  uint32_t seconds;
+		sec = month[(myRTC.month-2)];
+		if(myRTC.dayofmonth>1)
+		sec+=myRTC.dayofmonth-1;
 
-  // seconds from 1970 till 1 jan 00:00:00 of the given year
-  seconds= tm.Year*(SECS_PER_DAY * 365);
-  for (i = 0; i < tm.Year; i++) {
-    if (LEAP_YEAR(i)) {
-      seconds += SECS_PER_DAY;   // add extra days for leap years
-    }
-  }
-  
-  // add days for this year, months start from 1
-  for (i = 1; i < tm.Month; i++) {
-    if ( (i == 2) && LEAP_YEAR(tm.Year)) { 
-      seconds += SECS_PER_DAY * 29;
-    } else {
-      seconds += SECS_PER_DAY * monthDays[i-1];  //monthDay array starts from 0
-    }
-  }
-  seconds+= (tm.Day-1) * SECS_PER_DAY;
-  seconds+= tm.Hour * SECS_PER_HOUR;
-  seconds+= tm.Minute * SECS_PER_MIN;
-  seconds+= tm.Second;
-  return (time_t)seconds; 
-}
-*/
-
-
-
-
-
-
-		sec=0;
+		sec=sec*24;//hours
+		sec+=myRTC.hours;
+		sec=sec*60 + myRTC.minutes;
+		sec=sec*60 + myRTC.seconds + 1640995200;
+		//2022 = 1640995200
 		#endif
 	};
 	String get_time(){
