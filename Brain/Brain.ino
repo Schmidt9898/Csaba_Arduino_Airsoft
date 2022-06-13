@@ -1,6 +1,6 @@
 
 
-/*#define DEMO*/
+#define DEMO
 #define DEBUG  //comment this line out if you dont want log, also can reduce programsize
 
 #ifdef DEMO
@@ -62,7 +62,7 @@ byte progress=0;
 LED leds[4];
 Mini_game mini_games[4];
 Gyoscope gyro;
-
+uint8_t active_game_idx=0;
 
 
 #ifdef DEMO
@@ -186,7 +186,21 @@ void setup()
 	detention_end|= ((uint32_t)EEPROM[7]) << 16;
 	detention_end|= ((uint32_t)EEPROM[8]) << 24;
 
+
+
+	for(int i=0;i<4;i++)
+	{
+		if(progress & 1<<i)
+			active_game_idx++;
+		else
+			break;
+	}
+
+
 	log("progress: "+String(progress,2));
+
+
+	log("next game to play: "+String(active_game_idx));
 	lcd_write("progress: ",String(progress,2));
 
 	log("detonation time: "+time_to_string(time_of_detonation));
@@ -257,6 +271,13 @@ if(!(progress & 1<<7))
 		state=State::Day;
 	}
 	
+
+	/*if(active_game_idx>=4)
+	{
+		state=	
+	}*/
+
+
 	switch_state(State::Detention);
 
 	clock.refresh();
@@ -278,6 +299,9 @@ if(!(progress & 1<<7))
 		mini_games[i].init();
 		//mini_games[i].activate();
 	}
+
+
+
 
 	//if(state != State::Detention)
 	//	switch_state(state);
@@ -425,8 +449,9 @@ void switch_state(State next){
 			case State::Day: 
 				log("Entering Day");
 				lcd_write("Udvozollek! *_* "," Modulok aktivak");
-				for(int i=0;i<4;i++)
-					mini_games[i].activate();
+				mini_games[ active_game_idx ].activate();
+				//for(int i=0;i<4;i++)
+				//	mini_games[i].activate();
 				break;
 			case State::Night: 
 				log("Entering Night");
@@ -472,9 +497,15 @@ void day_loop(){
 				switch_state(State::Night);
 				return;
 			}
-		for(int i=0;i<4;i++)
+
+			if(mini_games[ active_game_idx ].solved)
+			{
+				log("WARNING INVALID GAME STATE");
+			}
+
+		//for(int i=0;i<4;i++)
 		{
-			auto t_state=mini_games[i].get_state();
+			auto t_state=mini_games[ active_game_idx ].get_state();
 
 			if(t_state==Mini_game_state::Unknown){
 				//log("game state is unknown");
@@ -482,16 +513,22 @@ void day_loop(){
 			}
 			else if (t_state==Mini_game_state::Good){
 				log("game state is good");
-				leds[i].turn(1);
-				progress = progress | 1<<i;
+				leds[active_game_idx].turn(1);
+				progress = progress | 1<<active_game_idx;
 				save_progress();
+				active_game_idx++;// go to next game
+				play_music(m_passed_attempt);
+				if(active_game_idx<4)
+				{
+					mini_games[ active_game_idx ].activate();
+				}
 			} 
 			else if (t_state==Mini_game_state::Bad)
 			{
 				log("game state is bad");
 				add_penalty();
 				switch_state(State::Detention);
-       play_music(m_failed_attempt);
+       			play_music(m_failed_attempt);
 				return;
 			}
 			else{

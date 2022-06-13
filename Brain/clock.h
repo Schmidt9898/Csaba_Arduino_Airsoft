@@ -80,19 +80,26 @@ struct	Clock
 		#endif
 	};
 	String get_time(){
-		//some offset
+#ifdef DEMO
 		uint32_t min =sec/60; 
 		uint32_t hour =min/60; 
-		//uint32_t day =min/60; 
-		//uint32_t	=min/60; 
+		return String(hour%24)+":"+String(min%60)+":"+String(sec%60);
+#else
 		return String(myRTC.hours)+":"+String(myRTC.minutes)+":"+String(myRTC.seconds);
-		//return min/60*1000+min%60;
+#endif
+
+
 	};
 	bool isDay(){
+		#ifdef DEMO
+		uint32_t min =sec/60; 
+		uint32_t hour =min/60; 
+		#else
 		//uint32_t min =myRTC.hours; 
 		uint32_t hour =myRTC.hours; 
     //log("hour "+String(myRTC.hours));
 		return hour>=time_morning && hour<time_night;
+		#endif
 	}
 
 };
