@@ -23,7 +23,7 @@ String time_to_string(uint32_t sec)
 #ifdef DEMO
 #else
 #include  <virtuabotixRTC.h>  //Library used
-virtuabotixRTC myRTC(6,5,4); //If you change the wiring change the pins here also
+virtuabotixRTC myRTC(6,5,4);  //If you change the wiring change the pins here also
 
 //short month[12]={31,28,31,30 ,31 ,30 ,31 ,31 ,30 ,31 ,30 ,31};
 uint16_t month[12]={31,59,90,120,151,181,211,242,272,303,333,364};
@@ -43,7 +43,7 @@ struct	Clock
 	
 	void refresh(){
 		#ifdef DEMO
-		sec = 28790+millis()/1000;
+		sec = 28800+millis()/1000;
 		#else
  		myRTC.updateTime();
 /*
@@ -98,8 +98,8 @@ struct	Clock
 		//uint32_t min =myRTC.hours; 
 		uint32_t hour =myRTC.hours; 
     //log("hour "+String(myRTC.hours));
-		return hour>=time_morning && hour<time_night;
 		#endif
+		return hour>=time_morning && hour<time_night;
 	}
 
 };

@@ -658,6 +658,7 @@ void final_pinpad_loop()
 void add_penalty()
 {
 	detention_end = clock.sec + detention_time;
+
 	// log(time_of_detonation-clock.sec);
 	// log("####");
 	// log(penalty_time);
@@ -667,9 +668,9 @@ void add_penalty()
 		save_detonation_time();
 	}
 	// save this time in eeprom
-	// save_detention_end_time();
+	save_detention_end_time();
 	// progress |= 1<<6;
-	save_progress();
+	//save_progress();
 }
 
 uint32_t detention_log_time = 0;

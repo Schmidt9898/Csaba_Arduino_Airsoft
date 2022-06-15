@@ -3,10 +3,10 @@
 #include <EEPROM.h>
 
 
+#define BUZZER 49 // piezo buzzer
 
 
-
-uint32_t detention_time = 1800; //in second
+uint32_t detention_end = 0; //in second
 uint32_t time_of_detonation;
 byte progress=0;
 
@@ -40,21 +40,30 @@ EEPROM.write(8, detention_end >> 24);
 
 void setup() {
 	 Serial.begin(9600);
-	 Serial.print("saving");
+	pinMode(BUZZER, OUTPUT);
+	noTone(BUZZER);
+	 Serial.print("Saving data to EEPROM");
 	{
 		time_of_detonation = 1655142221; // ide írd az időt
-		Serial.print(String(time_of_detonation,2));
+		Serial.print("Detonation time:\nIN BINARY: "+String(time_of_detonation,2));
+		Serial.print("UNIXEPOCH: "+String(time_of_detonation));
 		detention_end=0;
-		progress=0b00000000;
+		//first time bit | 1 empty bit | pincode bit | keycard bit | 4,3,2,1 game bit  
+		progress=0b00110000;
+		Serial.print("PROGRESS: "+String(progress,2));
 		save_detention_end_time();
+		tone(BUZZER,500,100);
+		delay(500);
 		save_detonation_time();
+		tone(BUZZER,1000,100);
+		delay(500);
 		save_progress();
-		//beep(1);
-		delay(100000);
+		tone(BUZZER,2000,100);
+		delay(500);
 	}
-	Serial.print("done");
+	Serial.print("Programing is done!");
 	
 }
 void loop() { 
-
+	delay(1000);
 }
