@@ -36,7 +36,7 @@ void lcd_init()
 }
 
 
-void lcd_write(String line0,String line1="")
+void lcd_write(String line0,String line1)
 {
 	lcd.clear();
 	lcd.setCursor(0,0);
@@ -44,6 +44,15 @@ void lcd_write(String line0,String line1="")
 	lcd.setCursor(0,1);
 	lcd.print(line1);
 }
+void lcd_write(String line,int n=0)
+{
+	//lcd.clear();
+	lcd.setCursor(0,n);
+	lcd.print(line);
+}
+
+
+
 
 void led_segment_init()
 {

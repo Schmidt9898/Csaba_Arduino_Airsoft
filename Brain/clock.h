@@ -8,8 +8,8 @@
 
 uint32_t detention_end=0;
 
-extern int time_morning;
-extern int time_night;
+extern const int time_morning;
+extern const int time_night;
 
 
 

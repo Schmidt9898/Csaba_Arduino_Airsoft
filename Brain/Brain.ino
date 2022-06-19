@@ -12,16 +12,49 @@
  *
  */
 
-//#define DEMO // Ha DEMO definiálva van akkor csak az én birtokomban lévő arduino mega konfigurációra buildel a program
+#define DEMO // Ha DEMO definiálva van akkor csak az én birtokomban lévő arduino mega konfigurációra buildel a program
 			 //  vegyük ki a DEMO sort itt ha nem arra akarunk fordítani
 #define DEBUG // comment this line out if you dont want log, also can reduce programsize
 			  // ha van log akkor kiépül a usb kommunikáció ami resetelheti az arduinót, de csak abban az esetben ha az géphez van kötve
+
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+//______                              _                
+//| ___ \                            | |               
+//| |_/ /_ _ _ __ __ _ _ __ ___   ___| |_ ___ _ __ ___ 
+//|  __/ _` | '__/ _` | '_ ` _ \ / _ \ __/ _ \ '__/ __|
+//| | | (_| | | | (_| | | | | | |  __/ ||  __/ |  \__ \
+//\_|  \__,_|_|  \__,_|_| |_| |_|\___|\__\___|_|  |___/
+                                                     
+
+// Innentől változtathatsz paramétereket
 
 #ifdef DEMO
 #define penalty_time_barrier 3599 // 59 perc 59 másodperc
 #else
 #define penalty_time_barrier three_day_in_sec // Ez az időintervallum alatt nem vonuk le büntetőidőt.
 #endif
+
+
+#define	TIME_OF_DETONATION	1655142221
+#define DETENTION_TIME  	1800
+#define TIME_PENALTY		3600
+#define	MORNIG_START		8
+#define	NIGHT_START			20
+#define	FIRST_PASS			"0000"
+#define	FINAL_PASS			"1111"
+
+
+//innentől ne változtass a kódon
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 
 #define MOTION_SENSOR 47 // mozgásérzékelő pin
 #define PIROTECH 48		 // bomba (pirotechnikai eszköz) aktiváló pin //ezt a pint különösen figyelni hogy ne definiáljuk újra
@@ -50,10 +83,13 @@ A0-A8 ig mp3 modul vezérlő pinek
 
 14-16 led 7 segment kijelző //TODO lehet át kéne rakni másik digitális pinre
 
-
-
-
 */
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
 
 #include <EEPROM.h>
 
@@ -74,20 +110,20 @@ enum State
 };
 void switch_state(State next);
 State state;					  // milyen helyzetben vagyunk
-State enter_detention_from_state; // hol voltunk
-State enter_night_from_state;	  // hol voltunk
+State enter_detention_from_state; // hol voltunk mielött büntibe kerültünk
+State enter_night_from_state;	  // hol voltunk mielött este lett
 
-uint32_t detention_time = 1800; // in second //fél óra
-uint32_t penalty_time = 3600;	// in second this will subtract from time 1 hour //1 óra
+uint32_t detention_time = DETENTION_TIME; // in second //fél óra
+uint32_t penalty_time = TIME_PENALTY;	// in second this will subtract from time 1 hour //1 óra
 
-uint32_t time_of_detonation; // time of detonation, save it in eeprom can't change here
+uint32_t time_of_detonation; 		// time of detonation, save it in eeprom can't change here
 
 Clock clock;
-int time_morning = 8; // mikor kezdődjön a reggel
-int time_night = 20;  // meddig tartson a nap
+const int time_morning = MORNIG_START; 	// mikor kezdődjön a reggel
+const int time_night = NIGHT_START;  		// meddig tartson a nap
 
-const String first_pass = "0000"; // jelszo kartya olvasás után
-const String final_pass = "1111"; // utolsó jelszó
+const String first_pass = FIRST_PASS; // jelszo kartya olvasás után
+const String final_pass = FINAL_PASS; // utolsó jelszó
 String input_password = "";		  // don't change, itt tárolom az eddig beírt karaktereket
 
 byte progress = 0; // itt tároljuk az előrehaladást
@@ -130,9 +166,7 @@ struct Keypad
 } keypad;
 #else
 #include <Keypad.h>
-
 const byte ROWS = 4, COLS = 3;
-
 char keys[ROWS][COLS] = {
 	{'1', '2', '3'},
 	{'4', '5', '6'},
@@ -149,31 +183,13 @@ void setup()
 	Serial.begin(9600);
 #endif
 
-	// ez a kikommentelt réész felel azért hogy az elején lementsük az adatokat
+	// ez a kikommentelt rész felel azért hogy az elején lementsük az adatokat
 	// erre a célra készült egy másik kód is ami csak ezt tartalmazza
-	// log("detonation time before save: "+time_to_string(time_of_detonation));
-	/*
-	{
-		// 2022.07.15 20:00:00 prepare to meet your doom 1657908000
-		time_of_detonation = 1655142221; // ide írd az időt
-		log(String(time_of_detonation,2));
-		detention_end=0;
-		progress=0b00000000;
-		save_detention_end_time();
-		save_detonation_time();
-		save_progress();
-		beep(1);
-		delay(100000);
-	}
-	*/
+	// elkészült az a kód -> setvar/setvar.ino
 
-	// load eeprom data
-	// eeprom has a lifecycle of 100,000 write/delete
-	// save only on reset, day,night,penalty state
-	// save on milestone comlete
 
 	lcd_init();
-	lcd_write("initializing", " .........");
+	lcd_write("Booting", "   .......");
 	led_segment_init();
 	led_segment(0); // may remove
 
@@ -181,13 +197,13 @@ void setup()
 
 	init_music_player();
 
-	pinMode(MOTION_SENSOR, INPUT); // may need resistor 10k
-	pinMode(PIROTECH, OUTPUT);	   // bomba
+	pinMode(MOTION_SENSOR, INPUT); 		// may need resistor 10k
+	pinMode(PIROTECH, OUTPUT);	   		// bomba
 	pinMode(card_reader_input_pin, INPUT);
-	pinMode(card_reader_activate_pin, OUTPUT); // HIGH is accept
+	pinMode(card_reader_activate_pin, OUTPUT);	// HIGH is accept
 	digitalWrite(card_reader_activate_pin, LOW);
 
-	digitalWrite(PIROTECH, LOW);
+	digitalWrite(PIROTECH, LOW);	//may give it a resistor
 
 	pinMode(BUZZER, OUTPUT);
 	noTone(BUZZER);
@@ -199,6 +215,7 @@ void setup()
 	beep(1);
 	delay(200);
 
+	//ledek
 	leds[0] = LED(50);
 	leds[1] = LED(51);
 	leds[2] = LED(52);
@@ -224,10 +241,10 @@ void setup()
 			break;
 	}
 
-	log("progress: " + String(progress, 2));
+	log("Progress: " + String(progress, 2));
 
 	log("next game to play: " + String(active_game_idx));
-	lcd_write("progress: ", String(progress, 2));
+	lcd_write("Progress: ", "   "+String(progress, 2));
 
 	log("detonation time: " + time_to_string(time_of_detonation));
 	log("detonation time: " + String(time_of_detonation));
@@ -235,14 +252,19 @@ void setup()
 	log("loaded detention: " + time_to_string(detention_end));
 
 	log("Start");
-	if (!(progress & 1 << 7))
+	if (!(progress & 1 << 7)) // it the first start
 	{
 		log("wait for first start");
-		lcd_write("1 min to save");
-		delay(60000);
+		uint32_t t=millis()+60000;
+		while(t>millis())
+		{
+		lcd_write("Before save:","  "+String((t-millis())/1000));
+		delay(1000);
+		}
 		// first start
 		// kell idő a beüzemelésre , lecsavarozásra és elhagyásra
 		// 1 órát várunk ilyenkor
+		
 		progress |= 1 << 7;
 		save_progress();
 		log("It is saved");
@@ -384,14 +406,7 @@ void loop()
 	default:
 		break;
 	}
-	/*
-	if(digitalRead(MOTION_SENSOR))
-		lcd_write("most");
-		else
-		lcd_write("most nem");
-	*/
-	delay(100);
-	// tone(52, 349,200);
+	delay(10);
 }
 
 void switch_state(State next)
@@ -404,6 +419,10 @@ void switch_state(State next)
 
 	// leave state events
 	if (state == State::Detention && next == State::Detention)
+	{
+		return;
+	}
+	if (state == State::Night && next == State::Detention)
 	{
 		return;
 	}
@@ -449,7 +468,7 @@ void switch_state(State next)
 		break;
 	case State::Wait_final_pin:
 		input_password = "";
-		lcd_write("Add meg a", " pinkodot");
+		lcd_write("Add meg a", " vegso pinkodot.");
 		log("Entering Wait_final_pin");
 		break;
 	case State::Detention:
@@ -488,7 +507,7 @@ void day_loop()
 		}
 		else if (t_state == Mini_game_state::Good)
 		{
-			log("game state is good");
+			log("minigame "+String(active_game_idx)+" passed");
 			leds[active_game_idx].turn(1);
 			progress = progress | 1 << active_game_idx;
 			save_progress();
@@ -501,7 +520,7 @@ void day_loop()
 		}
 		else if (t_state == Mini_game_state::Bad)
 		{
-			log("game state is bad");
+			log("minigame "+String(active_game_idx)+" failed attempt");
 			add_penalty();
 			switch_state(State::Detention);
 			play_music(m_failed_attempt);
