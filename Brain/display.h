@@ -32,6 +32,8 @@ void lcd_init()
 	//lcd.setCursor(0,1);
 	//lcd.print("masodik sor");
 	#else
+	lcd.begin(16, 2);
+	lcd.clear();
 	#endif
 }
 

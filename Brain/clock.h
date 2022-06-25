@@ -24,6 +24,8 @@ String time_to_string(uint32_t sec)
 #else
 #include  <virtuabotixRTC.h>  //Library used
 virtuabotixRTC myRTC(6,5,4);  //If you change the wiring change the pins here also
+					//clk data reset
+					//6,5,4
 
 //short month[12]={31,28,31,30 ,31 ,30 ,31 ,31 ,30 ,31 ,30 ,31};
 uint16_t month[12]={31,59,90,120,151,181,211,242,272,303,333,364};
