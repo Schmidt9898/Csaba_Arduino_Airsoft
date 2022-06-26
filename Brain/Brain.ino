@@ -12,7 +12,7 @@
  *
  */
 
-#define DEMO // Ha DEMO definiálva van akkor csak az én birtokomban lévő arduino mega konfigurációra buildel a program
+//#define DEMO // Ha DEMO definiálva van akkor csak az én birtokomban lévő arduino mega konfigurációra buildel a program
 			 //  vegyük ki a DEMO sort itt ha nem arra akarunk fordítani
 #define DEBUG // comment this line out if you dont want log, also can reduce programsize
 			  // ha van log akkor kiépül a usb kommunikáció ami resetelheti az arduinót, de csak abban az esetben ha az géphez van kötve
@@ -187,7 +187,7 @@ void setup()
 	// erre a célra készült egy másik kód is ami csak ezt tartalmazza
 	// elkészült az a kód -> setvar/setvar.ino
 
-
+	log("Log started.");
 	lcd_init();
 	lcd_write("Booting", "   .......");
 	led_segment_init();
@@ -207,6 +207,7 @@ void setup()
 
 	pinMode(BUZZER, OUTPUT);
 	noTone(BUZZER);
+	
 
 	beep(0);
 	delay(500);
@@ -221,6 +222,7 @@ void setup()
 	leds[2] = LED(52);
 	leds[3] = LED(53);
 
+	log("leds,bomb,motion sensore,card reader initialized");
 	// load eeprom saved data
 	progress = EEPROM[0];
 	time_of_detonation = ((uint32_t)EEPROM[1]);
@@ -242,23 +244,23 @@ void setup()
 	}
 
 	log("Progress: " + String(progress, 2));
-
-	log("next game to play: " + String(active_game_idx));
 	lcd_write("Progress: ", "   "+String(progress, 2));
 
-	log("detonation time: " + time_to_string(time_of_detonation));
+	//log("next game to play: " + String(active_game_idx));
+
+	//log("detonation time: " + time_to_string(time_of_detonation));
 	log("detonation time: " + String(time_of_detonation));
-	log(String(time_of_detonation, 2));
+	//log(String(time_of_detonation, 2));
 	log("loaded detention: " + time_to_string(detention_end));
 
-	log("Start");
+	log("Start program");
 	if (!(progress & 1 << 7)) // it the first start
 	{
 		log("wait for first start");
 		uint32_t t=millis()+60000;
 		while(t>millis())
 		{
-		lcd_write("Before save:","  "+String((t-millis())/1000));
+		lcd_write(String((t-millis())/1000)+" mp", " elso inditas.");
 		delay(1000);
 		}
 		// first start
@@ -271,8 +273,8 @@ void setup()
 
 		// delay(3600000);// 1 hour delay
 		// delay(60000);// 1 min delay
-		// uint32_t end_bolting=millis()+3600000;
-		uint32_t end_bolting = millis() + 60000;
+		uint32_t end_bolting=millis()+3600000;
+		//uint32_t end_bolting = millis() + 60000;
 		while (millis() < end_bolting)
 		{
 			beep(2);
@@ -314,6 +316,7 @@ void setup()
 		mini_games[i].init();
 		// mini_games[i].activate();
 	}
+	log("next game to play: " + String(active_game_idx));
 
 	// if(state != State::Detention)
 	//	switch_state(state);
@@ -336,6 +339,7 @@ void loop()
 {
 	// state independent tasks
 	clock.refresh();
+	lcd_update();
 	// log("Time is: "+clock.get_time());
 	if (next_log_time <= millis())
 	{
@@ -352,10 +356,11 @@ void loop()
 
 	if (gyro.did_gyroscope_move())
 	{
-		log("elmozdultam");
+		log("motion detected");
 		add_penalty();
 		switch_state(State::Detention);
 		play_music(m_move);
+		lcd_write("Ne mozgass!!","   Ne mozgass!!",6);
 	}
 
 	if (clock.isDay() && detect_motion())
@@ -368,7 +373,7 @@ void loop()
 		else
 		{
 			play_music(m_welcome);
-			lcd_write("Udvozollek!");
+			lcd_write("Udvozollek!"," Stalker",10);
 			next_music_play_time = millis() + 180000;
 		}
 	}
@@ -446,7 +451,7 @@ void switch_state(State next)
 	{
 	case State::Day:
 		log("Entering Day");
-		lcd_write("Udvozollek! *_* ", " Modulok aktivak");
+		lcd_write("Udvozollek! *_* ", " Modul "+String(active_game_idx+1)+" aktiv");
 		mini_games[active_game_idx].activate();
 		// for(int i=0;i<4;i++)
 		//	mini_games[i].activate();
@@ -513,6 +518,7 @@ void day_loop()
 			save_progress();
 			active_game_idx++; // go to next game
 			play_music(m_passed_attempt);
+			lcd_write("Modul "+String(active_game_idx),"  megoldva  *_*",5);
 			if (active_game_idx < 4)
 			{
 				mini_games[active_game_idx].activate();
@@ -524,6 +530,7 @@ void day_loop()
 			add_penalty();
 			switch_state(State::Detention);
 			play_music(m_failed_attempt);
+			lcd_write("Ezt meg","  gyakorolni kell",5); //TODO change szöveg
 			return;
 		}
 		else
@@ -541,9 +548,9 @@ void day_loop()
 	{
 		// all game is passed
 		log("all game is passed");
-		lcd_write("Minden modul ", "  Sikeres!!"); // TODO
 		play_music(m_all_game_passed);
 		switch_state(State::Wait_final_pin);
+		lcd_write("Minden modul ", "  Sikeres!!",10); // TODO
 	}
 	// switch_state(State::Night);
 }
@@ -616,6 +623,7 @@ void pinpad_loop()
 				play_music(m_failed_attempt);
 				add_penalty();
 				switch_state(State::Detention);
+				lcd_write("Hibas pin","     *_*",5); //TODO change szöveg
 			}
 		}
 		else
@@ -654,8 +662,7 @@ void final_pinpad_loop()
 				progress = 255;
 				save_progress();
 				lcd_write("Gratulalunk!", " Hatastalanitva!");
-				while (1)
-					;
+				while (1);
 				// switch_state(State::Day);
 			}
 			else
@@ -664,6 +671,7 @@ void final_pinpad_loop()
 				play_music(m_failed_attempt);
 				add_penalty();
 				switch_state(State::Detention);
+				lcd_write("Hibas pin","     *_*",5); //TODO change szöveg
 			}
 		}
 		else
@@ -736,7 +744,7 @@ void explosion_loop()
 	{
 		lcd_write("BOOM A Bomba", " felrobbant!!!");
 		delay(1000);
-		lcd_write("##############", "############");
+		lcd_write("################", "################");
 		delay(1000);
 	}
 }

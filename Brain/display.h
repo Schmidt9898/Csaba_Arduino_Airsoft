@@ -19,11 +19,13 @@
 #endif
 
 
-
-
-
+String line0,line1;
+bool lcd_isdelay=false; // did we write it back, so we dont write it rapidly 
+uint32_t write_back_time=0;
 void lcd_init()
 {
+	line0="";
+	line1="";
 	#ifdef DEMO
 	lcd.init(); 
 	lcd.backlight();
@@ -35,24 +37,51 @@ void lcd_init()
 	lcd.begin(16, 2);
 	lcd.clear();
 	#endif
+	log("LCD initilaized");
 }
 
 
-void lcd_write(String line0,String line1)
+void lcd_write(String line0_,String line1_,uint32_t sec=0)
 {
+	if(sec == 0){
+		line0=line0_;
+		line1=line1_;
+	}else
+	{
+		write_back_time=millis()+sec*1000;
+		lcd_isdelay=true;
+	}
+
 	lcd.clear();
 	lcd.setCursor(0,0);
 	lcd.print(line0);
 	lcd.setCursor(0,1);
 	lcd.print(line1);
 }
+void lcd_update()
+{
+	if(lcd_isdelay)
+	{
+		if(write_back_time>=millis())
+		{
+			lcd_isdelay=false;
+				lcd.clear();
+				lcd.setCursor(0,0);
+				lcd.print(line0);
+				lcd.setCursor(0,1);
+				lcd.print(line1);
+		}
+	}
+}
+
+
+
 void lcd_write(String line,int n=0)
 {
 	//lcd.clear();
 	lcd.setCursor(0,n);
 	lcd.print(line);
 }
-
 
 
 
@@ -69,6 +98,8 @@ void led_segment_init()
 	lc.setIntensity(0,8);
 	/* and clear the display */
 	lc.clearDisplay(0);
+
+	log("led segment display initialized")
 	#endif
 }
 
@@ -161,11 +192,9 @@ void init_music_player(){
 	digitalWrite(A7,HIGH);
 	pinMode(A8, OUTPUT);
 	digitalWrite(A8,HIGH);
-
+	log("music player initialized");
 }
 void play_music(int i){
-	//i+=music_start_pin;
- //log("HEEEEEEEEEEEEE");
 	digitalWrite(i,LOW);
 	delay(200);
 	digitalWrite(i,HIGH);

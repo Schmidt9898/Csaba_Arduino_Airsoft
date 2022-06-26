@@ -177,6 +177,7 @@ void init(){
 	#ifdef DEMO
 	//pinMode(2, INPUT_PULLUP);
 	#else
+	log("gyroscope initialized");
 	#endif
 
 }
