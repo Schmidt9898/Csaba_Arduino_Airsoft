@@ -106,7 +106,7 @@ void led_segment_init()
 	/* and clear the display */
 	lc.clearDisplay(0);
 
-	log("led segment display initialized")
+	log("led segment display initialized");
 	#endif
 }
 
