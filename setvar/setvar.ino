@@ -44,12 +44,12 @@ void setup() {
 	noTone(BUZZER);
 	 Serial.print("Saving data to EEPROM");
 	{
-		time_of_detonation = 1655142221; // ide írd az időt
+		time_of_detonation = 3600*10; // ide írd az időt
 		Serial.print("Detonation time:\nIN BINARY: "+String(time_of_detonation,2));
 		Serial.print("UNIXEPOCH: "+String(time_of_detonation));
 		detention_end=0;
 		//first time bit | 1 empty bit | pincode bit | keycard bit | 4,3,2,1 game bit  
-		progress=0b00110000;
+		progress=0b00000000;
 		Serial.print("PROGRESS: "+String(progress,2));
 		save_detention_end_time();
 		tone(BUZZER,500,100);

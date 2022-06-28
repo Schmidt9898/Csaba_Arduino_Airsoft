@@ -31,6 +31,9 @@
 //\_|  \__,_|_|  \__,_|_| |_| |_|\___|\__\___|_|  |___/
                                                      
 
+#define _20_day_in_sec 1728000
+
+
 // Innentől változtathatsz paramétereket
 
 #ifdef DEMO
@@ -40,9 +43,9 @@
 #endif
 
 
-#define	TIME_OF_DETONATION	1655142221
-#define DETENTION_TIME  	1800
-#define TIME_PENALTY		3600
+//#define	TIME_OF_DETONATION	120000   // ez a paramétert a setv var programban állítsd
+#define DETENTION_TIME  	30*60
+#define TIME_PENALTY		60*60
 #define	MORNIG_START		8
 #define	NIGHT_START			20
 #define	FIRST_PASS			"0000"
@@ -115,8 +118,9 @@ State enter_night_from_state;	  // hol voltunk mielött este lett
 
 uint32_t detention_time = DETENTION_TIME; // in second //fél óra
 uint32_t penalty_time = TIME_PENALTY;	// in second this will subtract from time 1 hour //1 óra
+uint32_t time_left_at_start = _20_day_in_sec;	// THIS IS FOR CLOCK ERROR CHECK
 
-uint32_t time_of_detonation; 		// time of detonation, save it in eeprom can't change here
+uint32_t time_of_detonation=120000; 		// time of detonation, save it in eeprom can't change here
 
 Clock clock;
 const int time_morning = MORNIG_START; 	// mikor kezdődjön a reggel
@@ -159,7 +163,7 @@ struct Keypad
 				count = 0;
 				return '#';
 			}
-			return 'a';
+			return '0';
 		}
 		return NO_KEY;
 	}
@@ -187,7 +191,7 @@ void setup()
 	// erre a célra készült egy másik kód is ami csak ezt tartalmazza
 	// elkészült az a kód -> setvar/setvar.ino
 
-	log("Log started.");
+	log("Program starting.");
 	lcd_init();
 	lcd_write("Booting", "   .......");
 	led_segment_init();
@@ -222,8 +226,9 @@ void setup()
 	leds[2] = LED(52);
 	leds[3] = LED(53);
 
-	log("leds,bomb,motion sensore,card reader initialized");
+	log("INIT: leds,bomb,motion sensore,card reader initialized");
 	// load eeprom saved data
+	
 	progress = EEPROM[0];
 	time_of_detonation = ((uint32_t)EEPROM[1]);
 	time_of_detonation |= ((uint32_t)EEPROM[2]) << 8;
@@ -235,6 +240,7 @@ void setup()
 	detention_end |= ((uint32_t)EEPROM[7]) << 16;
 	detention_end |= ((uint32_t)EEPROM[8]) << 24;
 
+	//progress = 0b10000000;
 	for (int i = 0; i < 4; i++)
 	{
 		if (progress & 1 << i)
@@ -249,14 +255,14 @@ void setup()
 	//log("next game to play: " + String(active_game_idx));
 
 	//log("detonation time: " + time_to_string(time_of_detonation));
-	log("detonation time: " + String(time_of_detonation));
+	log("loaded detonation time: " + String(time_of_detonation));
 	//log(String(time_of_detonation, 2));
 	log("loaded detention: " + time_to_string(detention_end));
 
 	log("Start program");
 	if (!(progress & 1 << 7)) // it the first start
 	{
-		log("wait for first start");
+		log("Wait for first start");
 		uint32_t t=millis()+60000;
 		while(t>millis())
 		{
@@ -269,7 +275,6 @@ void setup()
 		
 		progress |= 1 << 7;
 		save_progress();
-		log("It is saved");
 
 		// delay(3600000);// 1 hour delay
 		// delay(60000);// 1 min delay
@@ -287,18 +292,25 @@ void setup()
 
 	if (progress & (1 << 4))
 	{
-		log("card is done by save");
+		log("Card is done by save");
 		state = State::Wait_pin;
 	}
 	if (progress & (1 << 5))
 	{
-		log("pin is done by save");
+		log("Pin is done by save");
 		state = State::Day;
 	}
 
 	switch_state(State::Detention);
 
 	clock.refresh();
+
+	if(!clock.is_disconected) // save the valid left till explosion time
+		time_left_at_start = 60 + time_of_detonation-clock.sec;
+	//time_left_at_start/=2;//REMOVE THIS
+	
+	
+	log(String(time_left_at_start));
 	// detention_end=clock.sec+detention_time;
 
 	leds[0].turn(progress & (1 << 0));
@@ -316,7 +328,7 @@ void setup()
 		mini_games[i].init();
 		// mini_games[i].activate();
 	}
-	log("next game to play: " + String(active_game_idx));
+	log("Next game to play: " + String(active_game_idx));
 
 	// if(state != State::Detention)
 	//	switch_state(state);
@@ -335,10 +347,34 @@ uint32_t next_music_play_time = 180000; // 3 min
 
 uint32_t next_log_time = 0;
 
+
+
+
 void loop()
 {
 	// state independent tasks
 	clock.refresh();
+	if(clock.is_disconected)
+	{
+		lcd_write("ERROR: Clock is "," disconected!!",1);
+		beep(3);
+		delay(1000);
+		lcd_write("GAME STOPPED"," CALL HELP!!",1);
+		delay(1000);
+		return;
+	}
+	if(time_of_detonation - clock.sec > time_left_at_start)
+	{
+		lcd_write("ERROR: CLOCK IS"," OUT OF SYNC",1);
+		beep(3);
+		delay(1000);
+		lcd_write("GAME STOPPED"," CALL HELP!!",1);
+		delay(1000);
+		return;
+	}
+
+
+
 	lcd_update();
 	// log("Time is: "+clock.get_time());
 	if (next_log_time <= millis())
@@ -346,17 +382,19 @@ void loop()
 		next_log_time = millis() + 1000; // TODO change to 500
 		led_segment(time_of_detonation - clock.sec);
 		// log("det time :"+String(time_of_detonation));
-		// log("time:"+String(clock.sec)+"     T-"+time_to_string(time_of_detonation-clock.sec));
+		//log("Time: "+clock.get_time()+"     T-"+time_to_string(time_of_detonation-clock.sec));
 	}
 	if (time_of_detonation <= clock.sec)
 	{
+		//Serial.println(clock.get_time());
+		//Serial.println(String(time_of_detonation)+"  "+String(clock.sec));
 		// well boom
 		explosion_loop();
 	}
 
 	if (gyro.did_gyroscope_move())
 	{
-		log("motion detected");
+		log("Gyroscope motion detected");
 		add_penalty();
 		switch_state(State::Detention);
 		play_music(m_move);
@@ -372,6 +410,7 @@ void loop()
 		}
 		else
 		{
+			log("Motion sensore trigered");
 			play_music(m_welcome);
 			lcd_write("Udvozollek!"," Stalker",10);
 			next_music_play_time = millis() + 180000;
@@ -451,7 +490,7 @@ void switch_state(State next)
 	{
 	case State::Day:
 		log("Entering Day");
-		lcd_write("Udvozollek! *_* ", " Modul "+String(active_game_idx+1)+" aktiv");
+		lcd_write("Udvozollek! *_* ", " "+String(active_game_idx+1)+". modul aktiv");
 		mini_games[active_game_idx].activate();
 		// for(int i=0;i<4;i++)
 		//	mini_games[i].activate();
@@ -518,6 +557,7 @@ void day_loop()
 			save_progress();
 			active_game_idx++; // go to next game
 			play_music(m_passed_attempt);
+			lcd_write("Udvozollek! *_* ", " "+String(active_game_idx+1)+". modul aktiv");
 			lcd_write("Modul "+String(active_game_idx),"  megoldva  *_*",5);
 			if (active_game_idx < 4)
 			{
@@ -530,12 +570,13 @@ void day_loop()
 			add_penalty();
 			switch_state(State::Detention);
 			play_music(m_failed_attempt);
-			lcd_write("Ezt meg","  gyakorolni kell",5); //TODO change szöveg
+			lcd_write("Ezt meg"," gyakorolni kell",5); //TODO change szöveg
 			return;
 		}
 		else
 		{
-			// log("what?????????");
+			//do nothing
+			//log("minigame unhandled state");
 		}
 	}
 	// ellenörzés
@@ -738,8 +779,10 @@ bool detect_motion()
 
 void explosion_loop()
 {
+	log("LOG: FIREWORKS ACTIVATED");
 	// turn on petarda
 	digitalWrite(PIROTECH, HIGH);
+	lcd_isdelay=false;
 	while (true)
 	{
 		lcd_write("BOOM A Bomba", " felrobbant!!!");
@@ -753,12 +796,13 @@ void explosion_loop()
 // i byte
 void save_progress()
 {
-
+	log("SAVE: progress "+String(progress,2));
 	EEPROM.write(0, progress);
 }
 // 4 byte
 void save_detonation_time()
 {
+	log("SAVE: time of detonation "+String(time_of_detonation));
 	EEPROM.write(1, time_of_detonation);
 	EEPROM.write(2, time_of_detonation >> 8);
 	EEPROM.write(3, time_of_detonation >> 16);
@@ -767,6 +811,7 @@ void save_detonation_time()
 // 4byte
 void save_detention_end_time()
 {
+	log("SAVE: detention end time "+String(detention_end));
 	EEPROM.write(5, detention_end);
 	EEPROM.write(6, detention_end >> 8);
 	EEPROM.write(7, detention_end >> 16);

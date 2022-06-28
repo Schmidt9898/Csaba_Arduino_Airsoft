@@ -2,3 +2,11 @@
 test/
 *.docx
 *.pdf
+
+usblog/.vs
+usblog/bin
+usblog/obj
+usblog/Properties
+usblog/App.config
+usblog/usblog.sln
+usblog/usblog.csproj

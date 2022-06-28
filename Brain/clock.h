@@ -15,9 +15,14 @@ extern const int time_night;
 
 String time_to_string(uint32_t sec)
 {
+	char buff[10]="";
 	uint32_t min =sec/60; 
-	uint32_t hour =min/60;	
-	return String(hour)+":"+String(min%60)+":"+String(sec%60);
+	uint32_t hour =min/60;
+	min%=60;
+	sec%=60;
+	sprintf(buff,"%03d:%02d:%02d\0",(int)hour,(int)min,(int)sec);
+	return String(buff);
+	//return String(hour)+":"+String(min%60)+":"+String(sec%60);
 }
 
 #ifdef DEMO
@@ -36,6 +41,7 @@ struct	Clock
 {
 	//uint32_t time = 0; //in sec
 	uint32_t sec=0;
+	bool is_disconected=false;
 	/*Clock(int data,int reset)
 	{
 		
@@ -44,7 +50,10 @@ struct	Clock
 	
 	
 	void refresh(){
+		is_disconected=false;
 		#ifdef DEMO
+		//is_disconected=true;
+		//sec = -1;
 		sec = 28800+millis()/1000;
 		#else
  		myRTC.updateTime();
@@ -65,9 +74,17 @@ struct	Clock
   		
 //log("--->: "+String(myRTC.month));
 //log("......: "+String(month[(myRTC.month-2)]));
+		if(myRTC.month==0)
+		{
+			log("WARNING Clock is disconected.");
+			sec=0;
+			is_disconected=true;
+		}
+		if(myRTC.month>1)
 		sec = month[(myRTC.month-2)];
 		if(myRTC.dayofmonth>1)
 		sec+=myRTC.dayofmonth-1;
+		
    //log("napok: "+String(sec));
 
 		sec=sec*24;//hours

@@ -19,7 +19,7 @@
 #endif
 
 
-String line0,line1;
+String line0="",line1="";
 bool lcd_isdelay=false; // did we write it back, so we dont write it rapidly 
 uint32_t write_back_time=0;
 void lcd_init()
@@ -41,28 +41,35 @@ void lcd_init()
 }
 
 
-void lcd_write(String line0_,String line1_,uint32_t sec=0)
+void lcd_write(String line0_,String line1_,uint32_t sec_=0)
 {
-	if(sec == 0){
+	if(sec_ == 0){
 		line0=line0_;
 		line1=line1_;
 	}else
 	{
-		write_back_time=millis()+sec*1000;
+		lcd.clear();
+		lcd.setCursor(0,0);
+		lcd.print(line0_);
+		lcd.setCursor(0,1);
+		lcd.print(line1_);	
+		write_back_time=millis()+sec_*1000;
 		lcd_isdelay=true;
 	}
-
-	lcd.clear();
-	lcd.setCursor(0,0);
-	lcd.print(line0);
-	lcd.setCursor(0,1);
-	lcd.print(line1);
+	if(!lcd_isdelay)
+	{
+		lcd.clear();
+		lcd.setCursor(0,0);
+		lcd.print(line0);
+		lcd.setCursor(0,1);
+		lcd.print(line1);		
+	}
 }
 void lcd_update()
 {
 	if(lcd_isdelay)
 	{
-		if(write_back_time>=millis())
+		if(write_back_time<=millis())
 		{
 			lcd_isdelay=false;
 				lcd.clear();
@@ -74,7 +81,7 @@ void lcd_update()
 	}
 }
 
-
+/*
 
 void lcd_write(String line,int n=0)
 {
@@ -83,7 +90,7 @@ void lcd_write(String line,int n=0)
 	lcd.print(line);
 }
 
-
+*/
 
 void led_segment_init()
 {
@@ -206,8 +213,10 @@ void beep(int i){
 	tone(BUZZER,2000,100);
 	else if (i==1)
 	tone(BUZZER,1000,200);
-	else if(i=2)
-	tone(BUZZER,808,100);
+	else if(i==2)
+	tone(BUZZER,808,100);	
+	else if(i==3)
+	tone(BUZZER,404,500);
 }
 
 
