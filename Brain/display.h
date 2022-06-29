@@ -203,7 +203,7 @@ void init_music_player(){
 }
 void play_music(int i){
 	digitalWrite(i,LOW);
-	delay(200);
+	delay(500);
 	digitalWrite(i,HIGH);
 }
 //may add stop pin function

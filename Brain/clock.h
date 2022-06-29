@@ -15,12 +15,13 @@ extern const int time_night;
 
 String time_to_string(uint32_t sec)
 {
-	char buff[10]="";
-	uint32_t min =sec/60; 
-	uint32_t hour =min/60;
-	min%=60;
+	char buff[20]="\0";
+	uint32_t min_ =sec/60; 
+	uint32_t hour =min_/60;
+	min_%=60;
 	sec%=60;
-	sprintf(buff,"%03d:%02d:%02d\0",(int)hour,(int)min,(int)sec);
+	sprintf(buff,"%03d:%02d:%02d\0",(int)hour,(int)min_,(int)sec);
+  //log(String(buff));
 	return String(buff);
 	//return String(hour)+":"+String(min%60)+":"+String(sec%60);
 }

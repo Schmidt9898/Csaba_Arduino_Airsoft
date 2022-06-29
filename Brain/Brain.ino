@@ -228,7 +228,7 @@ void setup()
 
 	log("INIT: leds,bomb,motion sensore,card reader initialized");
 	// load eeprom saved data
-	
+	/*
 	progress = EEPROM[0];
 	time_of_detonation = ((uint32_t)EEPROM[1]);
 	time_of_detonation |= ((uint32_t)EEPROM[2]) << 8;
@@ -239,8 +239,9 @@ void setup()
 	detention_end |= ((uint32_t)EEPROM[6]) << 8;
 	detention_end |= ((uint32_t)EEPROM[7]) << 16;
 	detention_end |= ((uint32_t)EEPROM[8]) << 24;
-
-	//progress = 0b10000000;
+*/
+  time_of_detonation = 1659092299;
+	progress = 0b10000000;
 	for (int i = 0; i < 4; i++)
 	{
 		if (progress & 1 << i)
@@ -352,7 +353,6 @@ uint32_t next_log_time = 0;
 
 void loop()
 {
-	//log("LOOP");
 	// state independent tasks
 	clock.refresh();
 	if(clock.is_disconected)
@@ -365,7 +365,6 @@ void loop()
 		delay(1000);
 		return;
 	}
-
 	if(time_of_detonation - clock.sec > time_left_at_start)
 	{
 		log("ERROR: Clock is reseted.");
@@ -767,6 +766,7 @@ void detention_loop()
 		log("detention time left "+time_to_string(detention_end - clock.sec));
 	}
 	// log("you are in Detention");
+	// log("time left "+String(detention_end-clock.sec));
 
 	// check time for penalty
 	if (detention_end <= clock.sec)
