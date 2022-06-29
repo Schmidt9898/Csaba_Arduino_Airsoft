@@ -12,7 +12,7 @@
  *
  */
 
-#define DEMO // Ha DEMO definiálva van akkor csak az én birtokomban lévő arduino mega konfigurációra buildel a program
+//#define DEMO // Ha DEMO definiálva van akkor csak az én birtokomban lévő arduino mega konfigurációra buildel a program
 			 //  vegyük ki a DEMO sort itt ha nem arra akarunk fordítani
 #define DEBUG // comment this line out if you dont want log, also can reduce programsize
 			  // ha van log akkor kiépül a usb kommunikáció ami resetelheti az arduinót, de csak abban az esetben ha az géphez van kötve
