@@ -12,7 +12,7 @@
  *
  */
 
-//#define DEMO // Ha DEMO definiálva van akkor csak az én birtokomban lévő arduino mega konfigurációra buildel a program
+#define DEMO // Ha DEMO definiálva van akkor csak az én birtokomban lévő arduino mega konfigurációra buildel a program
 			 //  vegyük ki a DEMO sort itt ha nem arra akarunk fordítani
 #define DEBUG // comment this line out if you dont want log, also can reduce programsize
 			  // ha van log akkor kiépül a usb kommunikáció ami resetelheti az arduinót, de csak abban az esetben ha az géphez van kötve
@@ -120,7 +120,7 @@ uint32_t detention_time = DETENTION_TIME; // in second //fél óra
 uint32_t penalty_time = TIME_PENALTY;	// in second this will subtract from time 1 hour //1 óra
 uint32_t time_left_at_start = _20_day_in_sec;	// THIS IS FOR CLOCK ERROR CHECK
 
-uint32_t time_of_detonation=120000; 		// time of detonation, save it in eeprom can't change here
+uint32_t time_of_detonation=-1; 		// time of detonation, save it in eeprom can't change here
 
 Clock clock;
 const int time_morning = MORNIG_START; 	// mikor kezdődjön a reggel
@@ -356,6 +356,7 @@ void loop()
 	clock.refresh();
 	if(clock.is_disconected)
 	{
+		log("ERROR: Clock is disconected.");
 		lcd_write("ERROR: Clock is "," disconected!!",1);
 		beep(3);
 		delay(1000);
@@ -365,6 +366,7 @@ void loop()
 	}
 	if(time_of_detonation - clock.sec > time_left_at_start)
 	{
+		log("ERROR: Clock is reseted.");
 		lcd_write("ERROR: CLOCK IS"," OUT OF SYNC",1);
 		beep(3);
 		delay(1000);
@@ -539,6 +541,13 @@ void day_loop()
 	if (mini_games[active_game_idx].solved)
 	{
 		log("WARNING INVALID GAME STATE");
+		mini_games[active_game_idx].deactivate();
+		active_game_idx++;
+		lcd_write("Udvozollek! *_* ", " "+String(active_game_idx+1)+". modul aktiv");
+		if (active_game_idx < 4)
+		{
+			mini_games[active_game_idx].activate();
+		}
 	}
 
 	// for(int i=0;i<4;i++)
@@ -641,6 +650,7 @@ void pinpad_loop()
 	char key = keypad.getKey();
 	if (key)
 	{
+		log("KEY: "+key);
 		beep(0);
 		if (key == '*')
 		{ // clear pass
@@ -671,6 +681,7 @@ void pinpad_loop()
 		{
 			input_password += key;
 			lcd_write("Kerem a jelszot:", input_password);
+			log("INPUT FIELD: "+input_password);
 		}
 	}
 }
@@ -687,6 +698,7 @@ void final_pinpad_loop()
 	char key = keypad.getKey();
 	if (key)
 	{
+		log("KEY: "+key);
 		beep(0);
 		if (key == '*')
 		{ // clear pass
@@ -719,6 +731,7 @@ void final_pinpad_loop()
 		{
 			input_password += key;
 			lcd_write("Kerem a jelszot:", input_password);
+			log("INPUT FIELD: "+input_password);
 		}
 	}
 }
