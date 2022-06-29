@@ -352,6 +352,7 @@ uint32_t next_log_time = 0;
 
 void loop()
 {
+	//log("LOOP");
 	// state independent tasks
 	clock.refresh();
 	if(clock.is_disconected)
@@ -364,6 +365,7 @@ void loop()
 		delay(1000);
 		return;
 	}
+
 	if(time_of_detonation - clock.sec > time_left_at_start)
 	{
 		log("ERROR: Clock is reseted.");
@@ -762,9 +764,9 @@ void detention_loop()
 	{
 		detention_log_time = millis() + 1000;
 		lcd_write("Eszkoz zarolva!", time_to_string(detention_end - clock.sec));
+		log("detention time left "+time_to_string(detention_end - clock.sec));
 	}
 	// log("you are in Detention");
-	// log("time left "+String(detention_end-clock.sec));
 
 	// check time for penalty
 	if (detention_end <= clock.sec)
@@ -795,12 +797,12 @@ void explosion_loop()
 	log("LOG: FIREWORKS ACTIVATED");
 	// turn on petarda
 	digitalWrite(PIROTECH, HIGH);
-	lcd_isdelay=false;
+	//lcd_isdelay=false;
 	while (true)
 	{
-		lcd_write("BOOM A Bomba", " felrobbant!!!");
+		lcd_write("BOOM A Bomba", " felrobbant!!!",2);
 		delay(1000);
-		lcd_write("################", "################");
+		lcd_write("################", "################",2);
 		delay(1000);
 	}
 }
