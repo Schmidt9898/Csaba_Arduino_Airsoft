@@ -13,10 +13,25 @@ namespace usblog
         static void Main(string[] args)
         {
             StreamWriter file = new StreamWriter("arduinolog.txt", append: true);
+            file.WriteLine("---------------------------------------------------\n");
+            file.Flush();
             SerialPort usb = null;
+
+
+
+
             for (int i = 0; i < 10; i++)
             {
+                if (args.Length > 0)
+                {
+                    Console.WriteLine(args[0]);
+                    usb = new SerialPort(args[0], 9600);
+                }
+                else
+                {
                 usb = new SerialPort("COM" + i, 9600);
+
+                }
                 try
                 {
                     usb.Open();
@@ -24,6 +39,7 @@ namespace usblog
                     {
                         String line = usb.ReadLine();
                         string cleaned = line.Replace("\n", "").Replace("\r", "");
+                        cleaned = DateTime.Now.ToString("MM-dd HH:mm:ss") + " " + cleaned;
                         Console.WriteLine(cleaned);
                         file.WriteLine(cleaned);
                         file.Flush();

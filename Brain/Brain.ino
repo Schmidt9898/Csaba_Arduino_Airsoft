@@ -12,7 +12,7 @@
  *
  */
 
-//#define DEMO // Ha DEMO definiálva van akkor csak az én birtokomban lévő arduino mega konfigurációra buildel a program
+#define DEMO // Ha DEMO definiálva van akkor csak az én birtokomban lévő arduino mega konfigurációra buildel a program
 			 //  vegyük ki a DEMO sort itt ha nem arra akarunk fordítani
 #define DEBUG // comment this line out if you dont want log, also can reduce programsize
 			  // ha van log akkor kiépül a usb kommunikáció ami resetelheti az arduinót, de csak abban az esetben ha az géphez van kötve
@@ -44,7 +44,7 @@
 
 
 //#define	TIME_OF_DETONATION	120000   // ez a paramétert a setv var programban állítsd
-#define DETENTION_TIME  	30*60
+#define DETENTION_TIME  	10 //30*60
 #define TIME_PENALTY		60*60
 #define	MORNIG_START		8
 #define	NIGHT_START			20
@@ -424,7 +424,9 @@ void loop()
 	{
 		if (next_music_play_time < millis())
 		{
+			log("Start music");
 			play_music(m_music);
+
 			next_music_play_time = millis() + 300000;
 		}
 	}

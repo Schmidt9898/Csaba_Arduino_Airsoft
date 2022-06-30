@@ -166,7 +166,7 @@ struct LED {
 //zene
 //mozgas
 //most lehet játszani
-
+//A0 = 54
 #define m_welcome A0
 #define m_card_accept A1
 #define m_pass_good A2
@@ -179,8 +179,13 @@ struct LED {
 //#define m_cant_play A9
 
 
-int music_start_pin;
 void init_music_player(){
+	for(int i = PIN_A0;i<PIN_A0+9;i++)
+	{
+		pinMode(i, OUTPUT);
+		digitalWrite(i,HIGH);
+	}
+	/*
 	pinMode(A0, OUTPUT);
 	digitalWrite(A0,HIGH);
 	pinMode(A1, OUTPUT);
@@ -199,9 +204,11 @@ void init_music_player(){
 	digitalWrite(A7,HIGH);
 	pinMode(A8, OUTPUT);
 	digitalWrite(A8,HIGH);
+	*/
 	log("music player initialized");
 }
 void play_music(int i){
+	log("play audio: "+String(i));
 	digitalWrite(i,LOW);
 	delay(500);
 	digitalWrite(i,HIGH);

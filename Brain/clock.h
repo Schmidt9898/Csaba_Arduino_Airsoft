@@ -95,6 +95,14 @@ struct	Clock
 		sec=sec*60 + myRTC.seconds;
     //log("just sec: "+String(sec));
     sec+= 1640995200;
+
+	if(sec>1672531200) //2023
+	{
+		log("WARNING Clock pin is disconected.");
+		sec=0;
+		is_disconected=true;
+	}
+
     //log("all sec "+String(sec));
 		//2022 = 1640995200
 		#endif
