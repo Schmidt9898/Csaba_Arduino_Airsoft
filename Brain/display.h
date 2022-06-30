@@ -7,7 +7,7 @@
 
 
 
-#ifdef DEMO
+#ifdef I2C_BUMM
 #include <LiquidCrystal_I2C.h>
 	LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 #else
@@ -26,7 +26,7 @@ void lcd_init()
 {
 	line0="";
 	line1="";
-	#ifdef DEMO
+	#ifdef I2C_BUMM
 	lcd.init(); 
 	lcd.backlight();
 	//lcd.setCursor(0,0);

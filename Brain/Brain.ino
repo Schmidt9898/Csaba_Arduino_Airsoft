@@ -11,8 +11,8 @@
  * @brief Airsoft rendezvényre kellék, megoldható rejtvénypanel vezérlő szoftver.
  *
  */
-
-#define DEMO // Ha DEMO definiálva van akkor csak az én birtokomban lévő arduino mega konfigurációra buildel a program
+//#define I2C_BUMM  //ez a sor i2c csinál
+//#define DEMO // Ha DEMO definiálva van akkor csak az én birtokomban lévő arduino mega konfigurációra buildel a program
 			 //  vegyük ki a DEMO sort itt ha nem arra akarunk fordítani
 #define DEBUG // comment this line out if you dont want log, also can reduce programsize
 			  // ha van log akkor kiépül a usb kommunikáció ami resetelheti az arduinót, de csak abban az esetben ha az géphez van kötve
@@ -201,6 +201,30 @@ void setup()
 
 	init_music_player();
 
+/*
+play_music(m_welcome);
+delay(5000);
+play_music(m_card_accept);
+delay(5000);
+play_music(m_pass_good);
+delay(5000);
+play_music(m_passed_attempt);
+delay(5000);
+play_music(m_failed_attempt);
+delay(5000);
+play_music(m_all_game_passed);
+delay(5000);
+play_music(m_defusing_complete);
+delay(5000);
+play_music(m_move);
+delay(5000);
+play_music(m_music);
+delay(20000);
+
+*/
+
+  
+
 	pinMode(MOTION_SENSOR, INPUT); 		// may need resistor 10k
 	pinMode(PIROTECH, OUTPUT);	   		// bomba
 	pinMode(card_reader_input_pin, INPUT);
@@ -228,7 +252,7 @@ void setup()
 
 	log("INIT: leds,bomb,motion sensore,card reader initialized");
 	// load eeprom saved data
-	/*
+	
 	progress = EEPROM[0];
 	time_of_detonation = ((uint32_t)EEPROM[1]);
 	time_of_detonation |= ((uint32_t)EEPROM[2]) << 8;
@@ -239,9 +263,10 @@ void setup()
 	detention_end |= ((uint32_t)EEPROM[6]) << 8;
 	detention_end |= ((uint32_t)EEPROM[7]) << 16;
 	detention_end |= ((uint32_t)EEPROM[8]) << 24;
-*/
-  time_of_detonation = 72000+600;
-	progress = 0b10010110;
+/*
+  time_of_detonation = 1659092299;
+	progress = 0b10000000;
+	*/
 	for (int i = 0; i < 4; i++)
 	{
 		if (progress & 1 << i)
@@ -684,9 +709,9 @@ void pinpad_loop()
 		else
 		{
 			input_password += key;
-			lcd_write("Kerem a jelszot:", input_password);
 			log("INPUT FIELD: "+input_password);
 		}
+		lcd_write("Kerem a jelszot:", input_password);
 	}
 }
 void final_pinpad_loop()
