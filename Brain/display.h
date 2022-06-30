@@ -208,7 +208,7 @@ void init_music_player(){
 	log("music player initialized");
 }
 void play_music(int i){
-	log("play audio: "+String(i));
+	log("play audio: "+String(i-54));
 	digitalWrite(i,LOW);
 	delay(500);
 	digitalWrite(i,HIGH);

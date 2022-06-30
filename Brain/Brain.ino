@@ -240,8 +240,8 @@ void setup()
 	detention_end |= ((uint32_t)EEPROM[7]) << 16;
 	detention_end |= ((uint32_t)EEPROM[8]) << 24;
 */
-  time_of_detonation = 1659092299;
-	progress = 0b10000000;
+  time_of_detonation = 72000+600;
+	progress = 0b10010110;
 	for (int i = 0; i < 4; i++)
 	{
 		if (progress & 1 << i)
@@ -545,6 +545,7 @@ void day_loop()
 	{
 		log("WARNING INVALID GAME STATE");
 		mini_games[active_game_idx].deactivate();
+		leds[active_game_idx].turn(1);
 		active_game_idx++;
 		lcd_write("Udvozollek! *_* ", " "+String(active_game_idx+1)+". modul aktiv");
 		if (active_game_idx < 4)
@@ -653,7 +654,7 @@ void pinpad_loop()
 	char key = keypad.getKey();
 	if (key)
 	{
-		log("KEY: "+key);
+		log("KEY: "+String(key));
 		beep(0);
 		if (key == '*')
 		{ // clear pass
@@ -701,7 +702,7 @@ void final_pinpad_loop()
 	char key = keypad.getKey();
 	if (key)
 	{
-		log("KEY: "+key);
+		log("KEY: "+String(key));
 		beep(0);
 		if (key == '*')
 		{ // clear pass

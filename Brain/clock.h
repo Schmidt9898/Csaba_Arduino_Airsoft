@@ -55,7 +55,7 @@ struct	Clock
 		#ifdef DEMO
 		//is_disconected=true;
 		//sec = -1;
-		sec = 28800+millis()/1000;
+		sec = 72000-300+millis()/1000;
 		#else
  		myRTC.updateTime();
 /*
