@@ -5,12 +5,15 @@
 
 #define three_day_in_sec 259200
 //#define three_day_in_sec 3600
+#define one_day_in_sec 86400   //24*60*60
 
 uint32_t detention_end=0;
 
 extern const int time_morning;
 extern const int time_night;
 
+
+extern uint32_t time_of_detonation;
 
 
 String time_to_string(uint32_t sec)
@@ -119,6 +122,14 @@ struct	Clock
 
 	};
 	bool isDay(){
+
+	if (time_of_detonation - sec < one_day_in_sec)
+	{
+		return true;
+	}
+
+
+
 		#ifdef DEMO
 		uint32_t min =sec/60; 
 		uint32_t hour =min/60; 
