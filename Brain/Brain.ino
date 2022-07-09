@@ -11,7 +11,7 @@
  * @brief Airsoft rendezvényre kellék, megoldható rejtvénypanel vezérlő szoftver.
  *
  */
-//#define I2C_BUMM  //ez a sor i2c csinál
+#define I2C_BUMM  //ez a sor i2c csinál
 //#define DEMO // Ha DEMO definiálva van akkor csak az én birtokomban lévő arduino mega konfigurációra buildel a program
 			 //  vegyük ki a DEMO sort itt ha nem arra akarunk fordítani
 #define DEBUG // comment this line out if you dont want log, also can reduce programsize
@@ -44,12 +44,12 @@
 
 
 //#define	TIME_OF_DETONATION	120000   // ez a paramétert a setv var programban állítsd
-#define DETENTION_TIME  	10 //30*60
+#define DETENTION_TIME  	30 //30*60   // büntetésnél ennyit vár
 #define TIME_PENALTY		60*60
 #define	MORNIG_START		8
 #define	NIGHT_START			20
-#define	FIRST_PASS			"0000"
-#define	FINAL_PASS			"1111"
+#define	FIRST_PASS			"130711"
+#define	FINAL_PASS			"160226"
 
 
 //innentől ne változtass a kódon
@@ -200,7 +200,14 @@ void setup()
 	gyro.init();
 
 	init_music_player();
-
+  /*
+   pinMode(42, OUTPUT);
+  digitalWrite(42,HIGH);
+  digitalWrite(42,LOW);
+  delay(500);
+  digitalWrite(42,HIGH);
+*/
+  
 /*
 play_music(m_welcome);
 delay(5000);
@@ -227,11 +234,11 @@ delay(20000);
 
 	pinMode(MOTION_SENSOR, INPUT); 		// may need resistor 10k
 	pinMode(PIROTECH, OUTPUT);	   		// bomba
+	digitalWrite(PIROTECH, HIGH);	//may give it a resistor
 	pinMode(card_reader_input_pin, INPUT);
 	pinMode(card_reader_activate_pin, OUTPUT);	// HIGH is accept
 	digitalWrite(card_reader_activate_pin, LOW);
 
-	digitalWrite(PIROTECH, LOW);	//may give it a resistor
 
 	pinMode(BUZZER, OUTPUT);
 	noTone(BUZZER);
@@ -410,7 +417,7 @@ void loop()
 		next_log_time = millis() + 1000; // TODO change to 500
 		led_segment(time_of_detonation - clock.sec);
 		// log("det time :"+String(time_of_detonation));
-		//log("Time: "+clock.get_time()+"     T-"+time_to_string(time_of_detonation-clock.sec));
+		log("Time: "+clock.get_time()+"     T-"+time_to_string(time_of_detonation-clock.sec));
 	}
 	if (time_of_detonation <= clock.sec)
 	{
@@ -452,7 +459,7 @@ void loop()
 			log("Start music");
 			play_music(m_music);
 
-			next_music_play_time = millis() + 300000;
+			next_music_play_time = millis() + 240000;
 		}
 	}
 
@@ -824,7 +831,7 @@ void explosion_loop()
 {
 	log("LOG: FIREWORKS ACTIVATED");
 	// turn on petarda
-	digitalWrite(PIROTECH, HIGH);
+	digitalWrite(PIROTECH, LOW);
 	//lcd_isdelay=false;
 	while (true)
 	{

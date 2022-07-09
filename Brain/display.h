@@ -12,11 +12,14 @@
 	LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 #else
 	//CSABA
-	#include "LedControl.h"
+	
 	#include <LiquidCrystal.h>
 	LiquidCrystal lcd(34, 35, 36, 37, 38, 39);
-	LedControl lc=LedControl(14,16,15,1);
+	
 #endif
+
+#include "LedControl.h"
+LedControl lc=LedControl(14,16,15,1);
 
 
 String line0="",line1="";
