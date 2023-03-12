@@ -1,0 +1,19 @@
+#include <Arduino.h>
+#include "MyArduino.h"
+
+#if defined(ARDUINO_AVR_UNO)
+const char* boardname = "AVR UNO";
+#elif defined(ARDUINO_AVR_NANO)
+const char* boardname = "AVR NANO";
+#elif defined(ARDUINO_AVR_MEGA2560)
+const char* boardname = "AVR MEGA2560";
+#elif defined(ARDUINO_AVR_MICRO)
+const char* boardname = "AVR MICRO";
+#else
+const char* boardname = "UNKNOWN BOARD";
+#endif
+
+void printName()
+{
+  Serial.println(boardname);
+}

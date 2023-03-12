@@ -3,18 +3,10 @@
 #include <SPI.h>
 #include <MFRC522.h>
 
-#define MEGA
 
-#ifdef MEGA
-#define RST_PIN 5 // Configurable, see typical pin layout above
-#define SS_PIN 53 // Configurable, see typical pin layout above
 
-#else
 
-#define RST_PIN 9 // Configurable, see typical pin layout above
-#define SS_PIN 10 // Configurable, see typical pin layout above
 
-#endif
 
 MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522 instance
 
@@ -35,6 +27,7 @@ void printkey(MFRC522::MIFARE_Key &key)
 
 class Menu;
 class Listdetect;
+class Selected_keep;
 
 class State
 {
@@ -47,6 +40,7 @@ public:
 
 State *MENU = nullptr;
 State *LISTDETECT = nullptr;
+State *CARDNEAR = nullptr;
 State *state = nullptr; // MENU;
 
 String WFS();
@@ -60,6 +54,7 @@ public:
 		Serial.println("RFC debug tool:");
 		Serial.println("commands:");
 		Serial.println("0 is card, present loop");
+		Serial.println("1 is card keep");
 		String cm;
 		while ((cm = WFS()) != "q")
 		{
@@ -68,6 +63,10 @@ public:
 			if (cm == "0")
 			{
 				return LISTDETECT;
+			}
+			if (cm == "1")
+			{
+				return CARDNEAR;
 			}
 		}
 		return this;
@@ -93,7 +92,7 @@ public:
 				}
 				if (cm == "w")
 				{
-					Serial.print("Wake UP");
+					Serial.print("Wake UP ");
 					byte atqa_answer[2];
 					byte atqa_size = 2;
 					status = mfrc522.PICC_WakeupA(atqa_answer, &atqa_size);
@@ -101,7 +100,7 @@ public:
 				}
 				if (cm == "r")
 				{
-					Serial.print("Request A ");
+					Serial.print("RequestA ");
 					byte atqa_answer[2];
 					byte atqa_size = 2;
 					status = mfrc522.PICC_RequestA(atqa_answer, &atqa_size);
@@ -122,6 +121,25 @@ public:
 					status = mfrc522.PICC_HaltA();
 					Serial.print("HALT ");
 					Serial.println(mfrc522.GetStatusCodeName(status));
+				}
+				if (cm == "c")
+				{
+					byte blockAddr = 11;
+  					byte trailerBlock = 11;
+					while ((cm = GetStr()) != "q")
+					{
+						//status = mfrc522.PICC_HaltA();
+						status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &factorykey, &(mfrc522.uid));
+						if (status != MFRC522::STATUS_OK) {
+							Serial.print(F("PCD_Authenticate() failed: "));
+							Serial.println(mfrc522.GetStatusCodeName(status));
+							break;
+						}else
+						{
+						Serial.print("Connected ");
+						Serial.println(mfrc522.GetStatusCodeName(status));
+						}
+					}
 				}
 
 
@@ -153,9 +171,6 @@ public:
 			mfrc522.PCD_StopCrypto1();
 			*/
 			
-
-			// Dump debug info about the card; PICC_HaltA() is automatically called
-			//mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
 			
 
 		}
@@ -164,8 +179,115 @@ public:
 	}
 };
 
+class Cardnear : public State
+{
+public:
+	virtual State *main()
+	{
+		Serial.println("Card near");
+		Serial.println("commands:");
+		Serial.println("q for quit");
+		String cm;
+		while ((cm = GetStr()) != "q")
+		{
+			if (cm != "")
+			{
+				if(cm == "s")
+				{
+					Keep_card(2);
+				}
+
+			}
+		}
+		Serial.println("quiting");
+		return MENU;
+	}
+
+	bool is_equal(byte* a,byte*b,byte size)
+	{
+		for(byte i=0;i<size;i++)
+		{
+			if(a[i] != b[i])
+				return false;
+		}
+		return true;
+	}
+
+
+	bool Keep_card(int timeout = 1)//timeout in sec
+	{
+		int timeout_ms = timeout*1000;
+		unsigned long endtime = millis() + timeout*1000;
+
+		byte selected_uid[10] = {0};
+		bool is_empty = true;
+		bool is_active = false;
+
+		byte blockAddr = 11;
+  		byte trailerBlock = 11;
+
+
+		while(endtime > millis()) //until timeout is not reached, timeout restart when card is detected
+		{
+			if(!is_active)
+			{
+
+			if(mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial())
+			{
+				//new card is in the reader and ready state
+				//get the id
+				if(is_empty)
+				{
+					is_empty = false;
+					memcpy(selected_uid,mfrc522.uid.uidByte,mfrc522.uid.size);
+				}else
+				{
+					if(is_equal(mfrc522.uid.uidByte,selected_uid,mfrc522.uid.size))
+						{
+							is_active = true;
+						}else
+						{
+							Serial.println("not equal card id");
+						}
+				}
+			}
+			}else
+			{
+				status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &factorykey, &(mfrc522.uid));
+				if (status != MFRC522::STATUS_OK) {
+					Serial.print(F("PCD_Authenticate() failed: "));
+					Serial.println(mfrc522.GetStatusCodeName(status));
+					is_active = false;
+					continue;
+				}else
+				{
+					Serial.print("Connected ");
+					Serial.println(mfrc522.GetStatusCodeName(status));
+					endtime = millis() + timeout*1000;
+				}
+			}
+
+
+		}
+			Serial.println("Card keep timeout");
+			return false;
+
+
+
+	}
+
+
+
+
+
+
+};
+
+
+
 Menu menu_class;
 Listdetect listdetect_class;
+Cardnear cardnear_class;
 
 //*****************************************************************************************//
 void setup()
@@ -173,6 +295,7 @@ void setup()
 
 	MENU = &menu_class;
 	LISTDETECT = &listdetect_class;
+	CARDNEAR = &cardnear_class;
 	state = MENU;
 
 	Serial.begin(9600); // Initialize serial communications with the PC
