@@ -1,6 +1,9 @@
 #ifndef CARDSERVICE
 #define CARDSERVICE
 
+//TODO remove printf-s
+
+
 #include <SPI.h>
 #include <MFRC522.h>
 
@@ -18,9 +21,9 @@
 MFRC522::MIFARE_Key Prod_key;
 MFRC522::MIFARE_Key factory_key;
 
-MFRC522::MIFARE_Key* key;
-
 MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522 instance
+MFRC522::StatusCode status;
+
 
 //TODO init this with the key
 key.keyByte = {0x01,0x02,0x03,0x04,0x05,0x06}; //Secret password
@@ -48,15 +51,37 @@ bool add(uint32_t amount)
 }
 
 #define BANKDATABLOCK 4
-#define BANKDATATRAILER 7
+//#define AUTDATABLOCK 4
 
 //#define PERSON_NAME0 8
 //#define PERSON_NAME1 9
 //#define PERSON_BALANCE 10
 
+bool is_equal(byte* a,byte*b,byte size)
+{
+	for(byte i=0;i<size;i++)
+	{
+		if(a[i] != b[i])
+			return false;
+	}
+	return true;
+}
+
+/**
+ * @brief Returns the trailer addres from the corresponding addres
+ * 
+ * @param blockAddr 
+ * @return byte trailer addres
+ */
+byte Get_trailer(byte blockAddr)
+{
+	return (blockAddr / 4 + 1) * 4 - 1  
+}
+
 
 class CardService
 {
+	MFRC522::MIFARE_Key* key; //selected key
 
 	int timeout_ms = 2*1000; //time before we signals that card has been removed
 	unsigned long endtime = -1;//millis() + timeout*1000;
@@ -67,10 +92,6 @@ class CardService
 
 
 
-	//byte Targetblockaddr;
-	//byte len;
-	MFRC522::StatusCode status;
-
 	
 	bool Get_new_card(); //check for new card, non blocking, returns true if card is in the reader, it also returns true if called again on the same card
 
@@ -79,7 +100,10 @@ class CardService
 	bool Write_profile_to_card(Profile* profile);
 	bool Read_profile_from_card(Profile* profile);
 
-	bool Write_bytes_to_block()
+	bool Write_bytes_to_block(byte blockAddr,byte* bytes,byte len);
+
+	bool is_block_factory(byte blockAddr); //returns true if the block is coded with factory key
+	bool set_block_key(MFRC522::MIFARE_Key* key); //sets block key
 
 }
 
@@ -116,16 +140,90 @@ bool CardService::Write_profile_to_card(Profile* profile,Uid *uid)
 }
 
 
-
-	bool is_equal(byte* a,byte*b,byte size)
+bool CardService::Get_new_card(){
+	
+	if (is_card_present)
 	{
-		for(byte i=0;i<size;i++)
+		//TODO check timeout
+		//if()
 		{
-			if(a[i] != b[i])
-				return false;
+			return true;
 		}
-		return true;
 	}
+
+	if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial())
+	{
+		// new card is in the reader and ready state
+		// get the id
+		is_card_present = is_card_active = true;
+		memcpy(selected_uid, mfrc522.uid.uidByte, mfrc522.uid.size);
+	}
+}
+bool CardService::Check_card(){
+	if (!is_card_present)
+	{
+		return false;
+	}
+	if(is_card_active)
+	{
+		status = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, Get_trailer(BANKDATABLOCK) , key, &(mfrc522.uid));
+		if (status != MFRC522::STATUS_OK)
+		{
+			Serial.print(F("PCD_Authenticate() failed: "));
+			Serial.println(mfrc522.GetStatusCodeName(status));
+			is_card_active = false;
+			continue;
+		}
+		else
+		{
+			Serial.print("Connection is good.");
+			Serial.println(mfrc522.GetStatusCodeName(status));
+			endtime = millis() + timeout_ms;
+		}
+	}
+	if(!is_card_active) //note to self this is not an else statement because same loop next card check
+	{
+		if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial())
+		{
+			if (is_equal(mfrc522.uid.uidByte, selected_uid, mfrc522.uid.size))
+			{
+				is_card_active = true;
+				endtime = millis() + timeout_ms;
+			}
+			else
+			{
+				Serial.println("not equal card id");
+			}
+		}
+	}
+	if(is_card_present)
+	{
+		if(millis()>endtime)
+		{
+			//timeout
+			Serial.println("Timeout");
+			is_card_present=false;
+		}
+	}
+
+
+
+
+
+}
+bool CardService::Read_profile_from_card(Profile* profile){
+	//TODO implement
+}
+bool CardService::Write_bytes_to_block(byte blockAddr,byte* bytes,byte len){
+	//TODO implement
+}
+bool CardService::is_block_factory(byte blockAddr){
+	//TODO implement
+} 
+bool CardService::set_block_key(MFRC522::MIFARE_Key* key){
+	//TODO implement
+} 
+
 
 
 	bool Keep_card(int timeout = 1)//timeout in sec

@@ -5,17 +5,6 @@
 
 
 
-
-
-
-MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522 instance
-
-// Prepare key - all keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
-MFRC522::MIFARE_Key factorykey{{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}};
-MFRC522::MIFARE_Key mykey{{0x00, 0x01, 0x03, 0x05, 0x07, 0x09}};
-
-MFRC522::StatusCode status;
-
 void printkey(MFRC522::MIFARE_Key &key)
 {
 	for (byte i = 0; i < 6; i++)
