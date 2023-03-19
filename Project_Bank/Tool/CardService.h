@@ -66,11 +66,6 @@ struct Profile
 // This is sector 1 DO NOT USE SECTOR 0 !!!!!
 #define BANKDATABLOCK 4 
 #define NAMEDATABLOCK 5
-// #define AUTDATABLOCK 4
-
-// #define PERSON_NAME0 8
-// #define PERSON_NAME1 9
-// #define PERSON_BALANCE 10
 
 /**
  * @brief Print mfrckey to serial
@@ -202,7 +197,7 @@ bool CardService::Write_profile_to_card(Profile *profile,bool override_name)
 
 	if (override_name)
 	{
-		memcpy(&profile->name, buffer, 16);
+		memcpy(buffer,&profile->name, 16);
 		blockAddr = NAMEDATABLOCK;
 		if(!Write_bytes_to_block(blockAddr, buffer, 16))
 			{
@@ -339,6 +334,8 @@ bool CardService::Write_bytes_to_block(byte blockAddr, byte *bytes, byte len)
 }
 bool CardService::Read_bytes_from_block(byte blockAddr, byte *bytes, byte len)
 {
+	Serial.println("Reading block:");
+	Serial.println(blockAddr);
 	status = mfrc522.MIFARE_Read(blockAddr, bytes, &len);
 	if (status != MFRC522::STATUS_OK)
 	{

@@ -198,8 +198,8 @@ public:
 			{
 				cardservice.Read_profile_from_card(&testprofile);
 				testprofile.print();
-				testprofile.name = "card C \0";
-				testprofile.balance = 100;
+				sprintf(testprofile.name, "card C \0");
+				testprofile.balance++;
 				testprofile.transaction_count = 1234;
 				testprofile.uid = 3;
 				cardservice.Write_profile_to_card(&testprofile,true);
