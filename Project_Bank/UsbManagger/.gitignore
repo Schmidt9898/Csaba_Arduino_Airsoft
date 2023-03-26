@@ -1,0 +1,8 @@
+!.gitignore
+bin
+.vs
+obj
+Properties
+*.config
+*.csproj
+*.sln
