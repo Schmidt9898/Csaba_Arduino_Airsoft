@@ -52,6 +52,7 @@ namespace UsbManagger
                             Array.Copy(balance_bytes, 0, bytes, 16, 4);
                             Array.Copy(transaction_bytes, 0, bytes, 20, 4);
                             usb.Write(bytes, 0, 32);
+                            
                         }
                         Console.WriteLine(cleaned);
                     });

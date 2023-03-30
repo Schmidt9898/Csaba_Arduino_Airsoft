@@ -60,7 +60,7 @@ void loop()
 
 		while (cardservice.Check_card());
 		while (!cardservice.Get_new_card())
-			delay(300);
+			delay(1000);
 		tone(22, 440, 100);
 		memcpy(&temp_profile.uid, &cardservice.selected_uid, 4);
 		
@@ -68,7 +68,7 @@ void loop()
 		cardservice.MakeCardProd();
 
 		
-		cardservice.Write_profile_to_card(&testprofile,true);
+		cardservice.Write_profile_to_card(&temp_profile,true);
 		delay(100);
 
 
