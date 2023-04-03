@@ -231,14 +231,14 @@ bool CardService::Get_new_card()
 			return false;
 		}
 	}
-	Serial.println("Cheking for new card...");
+	//Serial.println("Cheking for new card...");
 	if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial())
 	{
 		// new card is in the reader and ready state
 		// get the id
 		is_card_present = is_card_active = true;
 		memcpy(selected_uid, mfrc522.uid.uidByte, mfrc522.uid.size);
-		Serial.println("new card selected");
+	//	Serial.println("new card selected");
 		return true;
 	}
 	return false;
@@ -264,8 +264,8 @@ bool CardService::Check_card()
 		}
 		else
 		{
-			Serial.print("Connection is good.");
-			Serial.println(mfrc522.GetStatusCodeName(status));
+			//Serial.print("Connection is good.");
+			//Serial.println(mfrc522.GetStatusCodeName(status));
 			endtime = millis() + timeout_ms;
 		}
 	}
@@ -286,7 +286,7 @@ bool CardService::Check_card()
 			}
 		}
 	}
-	Serial.println(endtime);
+	//Serial.println(endtime);
 	if (is_card_present)
 	{
 		if (millis() > endtime)

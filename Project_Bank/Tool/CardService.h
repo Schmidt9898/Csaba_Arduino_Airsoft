@@ -40,7 +40,7 @@ struct Profile
 	char name[16] = "NONAMENO\0"; // max 16 or ends with \0 terminator
 	int32_t balance = 0; //4 byte 
 	uint32_t transaction_count = 0;// 4 byte
-	uint32_t uid = 0; // 4 byte
+	uint32_t uid = 0; // 4 byte from the uid the card
 	/*
 	bool remove(int32_t amount)
 	{
@@ -104,6 +104,8 @@ void dump_byte_array(byte *buffer, byte bufferSize)
 		Serial.print(buffer[i] < 0x10 ? " 0" : " ");
 		Serial.print(buffer[i], HEX);
 	}
+	Serial.println("");
+
 }
 
 /**
@@ -119,6 +121,7 @@ byte Get_trailer(byte blockAddr)
 
 class CardService
 {
+  public:
 	MFRC522::MIFARE_Key *key; // selected key
 
 	size_t timeout_ms = 500;	// time before we signals that card has been removed
@@ -133,7 +136,7 @@ class CardService
 public:
 	CardService()
 	{
-		key = &factory_key;
+		key = &Prod_key;
 	}
 
 	void init()
@@ -168,9 +171,15 @@ public:
 	bool Write_bytes_to_block(byte blockAddr, byte *bytes, byte len);
 	bool Read_bytes_from_block(byte blockAddr, byte *bytes, byte len);
 	bool Authenticate_block(byte blockAddr);
+	bool Authenticate_block(byte blockAddr,MFRC522::MIFARE_Key* key_);
+
+	void MakeCardProd();
+
 
 	bool is_block_factory(byte blockAddr);		  // returns true if the block is coded with factory key
 	bool set_block_key(MFRC522::MIFARE_Key *key); // sets block key
+
+
 };
 
 /// CPP PARTS
@@ -235,7 +244,7 @@ bool CardService::Get_new_card()
 	return false;
 }
 
-size_t aut_counter = 0;
+//size_t aut_counter = 0;
 bool CardService::Check_card()
 {
 	if (!is_card_present)
@@ -244,8 +253,8 @@ bool CardService::Check_card()
 	}
 	if (is_card_active)
 	{
-		aut_counter++;
-		status = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, Get_trailer(BANKDATABLOCK), key, &(mfrc522.uid));
+		//aut_counter++;
+		status = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, Get_trailer(0), &factory_key, &(mfrc522.uid));
 		if (status != MFRC522::STATUS_OK)
 		{
 			Serial.print(F("PCD_Authenticate() failed: "));
@@ -350,9 +359,15 @@ bool CardService::Read_bytes_from_block(byte blockAddr, byte *bytes, byte len)
 	return true;
 }
 
+
 bool CardService::Authenticate_block(byte blockAddr)
 {
-	status = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, Get_trailer(blockAddr), this->key, &(mfrc522.uid));
+	return Authenticate_block(blockAddr,this->key);
+}
+
+bool CardService::Authenticate_block(byte blockAddr,MFRC522::MIFARE_Key* key_)
+{
+	status = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, Get_trailer(blockAddr), key_, &(mfrc522.uid));
 	if (status != MFRC522::STATUS_OK)
 	{
 		Serial.print(F("PCD_Authenticate() failed: "));
@@ -362,6 +377,50 @@ bool CardService::Authenticate_block(byte blockAddr)
 	}
 	return true;
 }
+
+void CardService::MakeCardProd(){
+
+Serial.println("aut prod");
+	if(Authenticate_block(BANKDATABLOCK,&Prod_key))
+		return; // nothing to do here
+	else
+	{
+		// now the card is not answearing
+
+		while(Check_card()){
+			if (is_card_active)
+			{
+				goto make_card_prod;
+			}
+		}
+		Serial.println("Card lost: FAILED");
+		return;
+
+	}
+	make_card_prod:
+	// card is factory need rewrite datablock
+Serial.println("aut factory");
+	if(Authenticate_block(BANKDATABLOCK,&factory_key))
+	{
+Serial.println("read");
+		bool val = Read_bytes_from_block(Get_trailer(BANKDATABLOCK), buffer, 18);
+		dump_byte_array(buffer,16);
+		memcpy(buffer,&Prod_key.keyByte,MFRC522::MIFARE_Misc::MF_KEY_SIZE);
+		dump_byte_array(buffer,16);
+		val = val && Write_bytes_to_block(Get_trailer(BANKDATABLOCK), buffer, 16);
+		//Serial.println("Huge error");
+		if(!val)
+			Serial.println("Make card prof failed!");
+	}
+	else
+	{
+		//Serial.println("Huge error");
+	}
+
+}
+
+
+
 
 bool CardService::is_block_factory(byte blockAddr)
 {

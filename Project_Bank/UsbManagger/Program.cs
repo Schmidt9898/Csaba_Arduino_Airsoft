@@ -39,9 +39,9 @@ namespace UsbManagger
 
                         if (cleaned.Contains("Waiting for profile"))
                         {
-                            String utf8string = "Laci";
-                            uint balance = 10;
-                            uint transaction = 11; // transaction count we dont realy need this
+                            String utf8string = "c card cccc";
+                            uint balance = 0;
+                            uint transaction = 0; // transaction count we dont realy need this
 
                             var balance_bytes = BitConverter.GetBytes(balance);
                             var transaction_bytes = BitConverter.GetBytes(transaction);

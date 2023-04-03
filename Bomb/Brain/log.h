@@ -7,21 +7,9 @@
 #else
 #define log(str) 
 #endif
-
-
-
-
-
 /*
 void _log(const char* a){
 	Serial.println(a);
 };*/
-
-
-
-
-
-
-
 
 #endif
