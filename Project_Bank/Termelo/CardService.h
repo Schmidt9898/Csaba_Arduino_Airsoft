@@ -11,10 +11,12 @@
 #include <MFRC522.h>
 
 #ifdef ARDUINO_AVR_MEGA2560
+#define SD_CS_PIN 4 // Configurable, see typical pin layout above
 #define RST_PIN 5 // Configurable, see typical pin layout above
 #define SS_PIN 3 // Configurable, see typical pin layout above
 #endif
 #ifdef ARDUINO_AVR_NANO
+#define SD_CS_PIN 4 // Configurable, see typical pin layout above
 #define RST_PIN 9 // Configurable, see typical pin layout above
 #define SS_PIN 10 // Configurable, see typical pin layout above
 #endif
@@ -132,7 +134,7 @@ public:
 
 	void init()
 	{
-		init_sdcard(4);
+		init_sdcard(SD_CS_PIN);
 		//SPI.begin();					   // Init SPI bus
 		mfrc522.PCD_Init();				   // Init MFRC522 card
 		delay(4);						   // Optional delay. Some board do need more time after init to be ready, see Readme
