@@ -6,47 +6,45 @@
 
 /**
  * @brief initializing the sd card reader
- * 
+ *
  * @return true all good card is ready
  * @return false there was an error card cannot be read
  */
 bool init_sdcard(int cs = 4)
 {
-	if (!SD.begin(4))
+	if (!SD.begin(cs))
 	{
 		logn("SD Card initialization failed!");
 		return false;
-		//while (1);
+		// while (1);
 	}
 	logn("SD Card initialization done.");
+	return true;
 }
 
-
-bool Log2file(const char* filename,char* buffer)
+bool Log2file(const char *filename, char *buffer)
 {
 	logn(strlen(buffer));
-
-  File myFile = SD.open(filename, FILE_WRITE);
-
-  // if the file opened okay, write to it:
-  if (myFile) {
-    log("logging ");
-    myFile.write(buffer,strlen(buffer));
-    // close the file:
-    myFile.close();
-    logn("done.");
-	return true;
-  } else {
-    // if the file didn't open, print an error:
-    logn("...,error opening file");
-	return false;
-  }
-
-
+	File myFile = SD.open(filename, FILE_WRITE);
+	// if the file opened okay, write to it:
+	if (myFile)
+	{
+		log("logging ");
+		myFile.write(buffer, strlen(buffer));
+		// close the file:
+		myFile.close();
+		logn("done.");
+		return true;
+	}
+	else
+	{
+		// if the file didn't open, print an error:
+		logn("...,error opening file");
+		myFile.close();
+		return false;
+	}
 }
 
-
-//TODO read
-
+// TODO read
 
 #endif

@@ -4,7 +4,6 @@
 // TODO remove printf-s
 #include "log.h"
 
-
 #include "sdlog.h"
 
 #include <SPI.h>
@@ -12,13 +11,13 @@
 
 #ifdef ARDUINO_AVR_MEGA2560
 #define SD_CS_PIN 4 // Configurable, see typical pin layout above
-#define RST_PIN 5 // Configurable, see typical pin layout above
-#define SS_PIN 3 // Configurable, see typical pin layout above
+#define RST_PIN 5	// Configurable, see typical pin layout above
+#define SS_PIN 31	// Configurable, see typical pin layout above
 #endif
 #ifdef ARDUINO_AVR_NANO
 #define SD_CS_PIN 4 // Configurable, see typical pin layout above
-#define RST_PIN 9 // Configurable, see typical pin layout above
-#define SS_PIN 10 // Configurable, see typical pin layout above
+#define RST_PIN 9	// Configurable, see typical pin layout above
+#define SS_PIN 10	// Configurable, see typical pin layout above
 #endif
 // data to be stored
 
@@ -30,10 +29,10 @@ MFRC522::StatusCode status;
 
 struct Profile
 {
-	char name[16] = "NONAMENO\0"; // max 16 or ends with \0 terminator
-	int32_t balance = 0; //4 byte 
-	uint32_t transaction_count = 0;// 4 byte
-	uint32_t uid = 0; // 4 byte from the uid the card
+	char name[16] = "NONAMENO\0";	// max 16 or ends with \0 terminator
+	int32_t balance = 0;			// 4 byte
+	uint32_t transaction_count = 0; // 4 byte
+	uint32_t uid = 0;				// 4 byte from the uid the card
 	/*
 	bool remove(int32_t amount)
 	{
@@ -47,17 +46,22 @@ struct Profile
 
 	}
 	*/
-	void print(){
+	void print()
+	{
 		logn("Profile data:");
-		log("name: ");logn(name);
-		log("balance = ");logn(balance);
-		log("transaction count = ");logn(transaction_count);
-		log("uid ");logn(uid);
+		log("name: ");
+		logn(name);
+		log("balance = ");
+		logn(balance);
+		log("transaction count = ");
+		logn(transaction_count);
+		log("uid ");
+		logn(uid);
 	};
 };
 
 // This is sector 1 DO NOT USE SECTOR 0 !!!!!
-#define BANKDATABLOCK 4 
+#define BANKDATABLOCK 4
 #define NAMEDATABLOCK 5
 
 /**
@@ -98,7 +102,6 @@ void dump_byte_array(byte *buffer, byte bufferSize)
 		loghex(buffer[i]);
 	}
 	logn("");
-
 }
 
 /**
@@ -114,7 +117,7 @@ byte Get_trailer(byte blockAddr)
 
 class CardService
 {
-  public:
+public:
 	MFRC522::MIFARE_Key *key; // selected key
 
 	size_t timeout_ms = 500;	// time before we signals that card has been removed
@@ -132,21 +135,24 @@ public:
 		key = &Prod_key;
 	}
 
-	void init()
+	bool init()
 	{
-		init_sdcard(SD_CS_PIN);
-		//SPI.begin();					   // Init SPI bus
+		bool sd_succes = true, rf_succes = true;
+		sd_succes = init_sdcard(SD_CS_PIN);
+		SPI.begin();					   // Init SPI bus //init_sdcard initializing this
 		mfrc522.PCD_Init();				   // Init MFRC522 card
 		delay(4);						   // Optional delay. Some board do need more time after init to be ready, see Readme
 		mfrc522.PCD_DumpVersionToSerial(); // Show details of PCD - MFRC522 Card Reader details
-		check_module_connection();
-		logn("Constructor 112");
-
-	char buff[18] = "init cardservice\n"; 
-
-	Log2file("log2.log",buff);
+		rf_succes = check_module_connection();
 
 
+		log(sd_succes);
+		log(rf_succes);
+		logn(" init cardservice:");
+
+		char buff[18] = "init cardservice\n";
+
+		return sd_succes && rf_succes;
 	}
 
 	bool check_module_connection()
@@ -165,26 +171,23 @@ public:
 
 	bool Check_card(); // returns true if card is still present
 
-	bool Write_profile_to_card(Profile *profile,bool override_name = false);
+	bool Write_profile_to_card(Profile *profile, bool override_name = false);
 	bool Read_profile_from_card(Profile *profile);
 
 	bool Write_bytes_to_block(byte blockAddr, byte *bytes, byte len);
 	bool Read_bytes_from_block(byte blockAddr, byte *bytes, byte len);
 	bool Authenticate_block(byte blockAddr);
-	bool Authenticate_block(byte blockAddr,MFRC522::MIFARE_Key* key_);
+	bool Authenticate_block(byte blockAddr, MFRC522::MIFARE_Key *key_);
 
 	void MakeCardProd();
 
-
 	bool is_block_factory(byte blockAddr);		  // returns true if the block is coded with factory key
 	bool set_block_key(MFRC522::MIFARE_Key *key); // sets block key
-
-
 };
 
 /// CPP PARTS
 
-bool CardService::Write_profile_to_card(Profile *profile,bool override_name)
+bool CardService::Write_profile_to_card(Profile *profile, bool override_name)
 {
 	byte blockAddr = BANKDATABLOCK;
 	// TODO dump data into buffer
@@ -195,30 +198,26 @@ bool CardService::Write_profile_to_card(Profile *profile,bool override_name)
 		return false;
 	}
 	// Write data to the block
-	memcpy(buffer,&profile->balance, 4);
-	memcpy(&buffer[4],&profile->transaction_count, 4);
-	memcpy(&buffer[8],&profile->uid, 4);
+	memcpy(buffer, &profile->balance, 4);
+	memcpy(&buffer[4], &profile->transaction_count, 4);
+	memcpy(&buffer[8], &profile->uid, 4);
 
-	if(!Write_bytes_to_block(blockAddr, buffer, 16))
+	if (!Write_bytes_to_block(blockAddr, buffer, 16))
 	{
 		return false;
 	}
 
 	if (override_name)
 	{
-		memcpy(buffer,&profile->name, 16);
+		memcpy(buffer, &profile->name, 16);
 		blockAddr = NAMEDATABLOCK;
-		if(!Write_bytes_to_block(blockAddr, buffer, 16))
-			{
-				return false;
-			}
+		if (!Write_bytes_to_block(blockAddr, buffer, 16))
+		{
+			return false;
+		}
 	}
-	
+
 	return true;
-
-
-
-
 }
 
 bool CardService::Get_new_card()
@@ -231,20 +230,20 @@ bool CardService::Get_new_card()
 			return false;
 		}
 	}
-	//logn("Cheking for new card...");
+	// logn("Cheking for new card...");
 	if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial())
 	{
 		// new card is in the reader and ready state
 		// get the id
 		is_card_present = is_card_active = true;
 		memcpy(selected_uid, mfrc522.uid.uidByte, mfrc522.uid.size);
-	//	logn("new card selected");
+		// logn("new card selected");
 		return true;
 	}
 	return false;
 }
 
-//size_t aut_counter = 0;
+// size_t aut_counter = 0;
 bool CardService::Check_card()
 {
 	if (!is_card_present)
@@ -253,7 +252,7 @@ bool CardService::Check_card()
 	}
 	if (is_card_active)
 	{
-		//aut_counter++;
+		// aut_counter++;
 		status = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, Get_trailer(0), &factory_key, &(mfrc522.uid));
 		if (status != MFRC522::STATUS_OK)
 		{
@@ -264,8 +263,8 @@ bool CardService::Check_card()
 		}
 		else
 		{
-			//log("Connection is good.");
-			//logn(mfrc522.GetStatusCodeName(status));
+			// log("Connection is good.");
+			// logn(mfrc522.GetStatusCodeName(status));
 			endtime = millis() + timeout_ms;
 		}
 	}
@@ -286,7 +285,7 @@ bool CardService::Check_card()
 			}
 		}
 	}
-	//logn(endtime);
+	// logn(endtime);
 	if (is_card_present)
 	{
 		if (millis() > endtime)
@@ -307,7 +306,7 @@ bool CardService::Read_profile_from_card(Profile *profile)
 	{
 		return false;
 	}
-	// 
+	//
 
 	Read_bytes_from_block(blockAddr, buffer, 18);
 
@@ -318,10 +317,8 @@ bool CardService::Read_profile_from_card(Profile *profile)
 	blockAddr = NAMEDATABLOCK;
 	Read_bytes_from_block(blockAddr, buffer, 18);
 	memcpy(&profile->name, buffer, 16);
-	
+
 	return true;
-
-
 }
 bool CardService::Write_bytes_to_block(byte blockAddr, byte *bytes, byte len)
 {
@@ -359,13 +356,12 @@ bool CardService::Read_bytes_from_block(byte blockAddr, byte *bytes, byte len)
 	return true;
 }
 
-
 bool CardService::Authenticate_block(byte blockAddr)
 {
-	return Authenticate_block(blockAddr,this->key);
+	return Authenticate_block(blockAddr, this->key);
 }
 
-bool CardService::Authenticate_block(byte blockAddr,MFRC522::MIFARE_Key* key_)
+bool CardService::Authenticate_block(byte blockAddr, MFRC522::MIFARE_Key *key_)
 {
 	status = (MFRC522::StatusCode)mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, Get_trailer(blockAddr), key_, &(mfrc522.uid));
 	if (status != MFRC522::STATUS_OK)
@@ -378,16 +374,18 @@ bool CardService::Authenticate_block(byte blockAddr,MFRC522::MIFARE_Key* key_)
 	return true;
 }
 
-void CardService::MakeCardProd(){
+void CardService::MakeCardProd()
+{
 
-logn("aut prod");
-	if(Authenticate_block(BANKDATABLOCK,&Prod_key))
+	logn("aut prod");
+	if (Authenticate_block(BANKDATABLOCK, &Prod_key))
 		return; // nothing to do here
 	else
 	{
 		// now the card is not answearing
 
-		while(Check_card()){
+		while (Check_card())
+		{
 			if (is_card_active)
 			{
 				goto make_card_prod;
@@ -395,32 +393,27 @@ logn("aut prod");
 		}
 		logn("Card lost: FAILED");
 		return;
-
 	}
-	make_card_prod:
+make_card_prod:
 	// card is factory need rewrite datablock
-logn("aut factory");
-	if(Authenticate_block(BANKDATABLOCK,&factory_key))
+	logn("aut factory");
+	if (Authenticate_block(BANKDATABLOCK, &factory_key))
 	{
-logn("read");
+		logn("read");
 		bool val = Read_bytes_from_block(Get_trailer(BANKDATABLOCK), buffer, 18);
-		dump_byte_array(buffer,16);
-		memcpy(buffer,&Prod_key.keyByte,MFRC522::MIFARE_Misc::MF_KEY_SIZE);
-		dump_byte_array(buffer,16);
+		dump_byte_array(buffer, 16);
+		memcpy(buffer, &Prod_key.keyByte, MFRC522::MIFARE_Misc::MF_KEY_SIZE);
+		dump_byte_array(buffer, 16);
 		val = val && Write_bytes_to_block(Get_trailer(BANKDATABLOCK), buffer, 16);
-		//logn("Huge error");
-		if(!val)
+		// logn("Huge error");
+		if (!val)
 			logn("Make card prof failed!");
 	}
 	else
 	{
-		//logn("Huge error");
+		// logn("Huge error");
 	}
-
 }
-
-
-
 
 bool CardService::is_block_factory(byte blockAddr)
 {
