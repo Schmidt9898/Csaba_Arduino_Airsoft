@@ -9,8 +9,8 @@ a kártyára írás közben piros led és ne vegye ki a kártyát felirat,
 majd vissza kezdő állapotba, zöld led, startra vár
 */
 
-#include "display.h"
-#include "CardService.h"
+#include "include/display.h"
+#include "include/CardService.h"
 
 CardService cardservice; //  9,10 pin
 
@@ -69,7 +69,8 @@ void setup()
 
 	led_zold.turn(on); // if all good green led turned on
 	logn("Connected!");
-	pinMode(BUZZER, OUTPUT); // Set buzzer - pin 9 as an output
+	
+	pinMode(BUZZER, OUTPUT); // Set buzzer - pin 8 as an output //MOVE TO DISPLAY
 	beep(3);
   
 }
