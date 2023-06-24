@@ -1,10 +1,9 @@
 #ifndef CARDSERVICE
 #define CARDSERVICE
 
-// TODO remove printf-s
 #include "log.h"
 
-#include "sdlog.h"
+//#include "sdlog.h"
 
 #include <SPI.h>
 #include <MFRC522.h>
@@ -12,7 +11,7 @@
 #ifdef ARDUINO_AVR_MEGA2560
 #define SD_CS_PIN 4 // Configurable, see typical pin layout above
 #define RST_PIN 5	// Configurable, see typical pin layout above
-#define SS_PIN 31	// Configurable, see typical pin layout above
+#define SS_PIN 6	// Configurable, see typical pin layout above
 #endif
 #ifdef ARDUINO_AVR_NANO
 #define SD_CS_PIN 4 // Configurable, see typical pin layout above
@@ -137,22 +136,23 @@ public:
 
 	bool init()
 	{
-		bool sd_succes = true, rf_succes = true;
-		sd_succes = init_sdcard(SD_CS_PIN);
-		SPI.begin();					   // Init SPI bus //init_sdcard initializing this
+		//bool sd_succes = true;
+		bool rf_succes = true;
+		//sd_succes = init_sdcard(SD_CS_PIN);
+		SPI.begin();					   // Init SPI bus
 		mfrc522.PCD_Init();				   // Init MFRC522 card
 		delay(4);						   // Optional delay. Some board do need more time after init to be ready, see Readme
 		mfrc522.PCD_DumpVersionToSerial(); // Show details of PCD - MFRC522 Card Reader details
 		rf_succes = check_module_connection();
 
 
-		log(sd_succes);
+		//log(sd_succes);
 		log(rf_succes);
 		logn(" init cardservice:");
 
 		char buff[18] = "init cardservice\n";
 
-		return sd_succes && rf_succes;
+		return /*sd_succes &&*/ rf_succes;
 	}
 
 	bool check_module_connection()

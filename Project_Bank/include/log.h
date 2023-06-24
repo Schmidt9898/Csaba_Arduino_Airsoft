@@ -2,7 +2,7 @@
 #define S_LOGGER
 
 
-//#define USESERIAL
+#define USESERIAL
 
 #ifdef USESERIAL
 #define init_log Serial.begin(9600)

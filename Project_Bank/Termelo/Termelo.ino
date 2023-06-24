@@ -31,7 +31,7 @@ Profile temp_profile;
 
 bool isbuttonDown = false;
 
-uint32_t termeles_time = 5;
+uint32_t termeles_time = 60*30;
 
 LED led_zold(zold_pin);
 LED led_sarga(sarga_pin);
@@ -186,14 +186,17 @@ termeles:
 
 	temp_profile.print();
 
+
+
+
+#ifdef USESERIAL
 	static char str[80]; //more than enough
 	//  log to card
 	//  name,uid,transaction_cunt,previous,added,new_balance
 	//longest string is
 	//"aaaaaaaaaaaaaaaa,4294967296,4294967296,-2147483648,-2147483648,-2147483648R"
-
 	sprintf(str,"%s,%lu,%lu,%ld,%d,%ld\n",temp_profile.name,temp_profile.uid,temp_profile.transaction_count,previous_balance,termeles_jutalom,temp_profile.balance); // csv format
-
 	logn(String(str));
-	Log2file(LOGFILE_NAME, str);
+#endif
+	//Log2file(LOGFILE_NAME, str);
 }
