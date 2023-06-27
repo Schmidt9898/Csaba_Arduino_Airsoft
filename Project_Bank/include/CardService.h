@@ -323,11 +323,11 @@ bool CardService::Read_profile_from_card(Profile *profile)
 bool CardService::Write_bytes_to_block(byte blockAddr, byte *bytes, byte len)
 {
 	// Write data to the block
-	log(F("Writing data into block "));
-	log(blockAddr);
-	logn(F(" ..."));
-	dump_byte_array(buffer, 16);
-	logn();
+	//log(F("Writing data into block "));
+	//log(blockAddr);
+	//logn(F(" ..."));
+	//dump_byte_array(buffer, 16);
+	//logn();
 	status = (MFRC522::StatusCode)mfrc522.MIFARE_Write(blockAddr, buffer, len);
 	if (status != MFRC522::STATUS_OK)
 	{
@@ -340,8 +340,8 @@ bool CardService::Write_bytes_to_block(byte blockAddr, byte *bytes, byte len)
 }
 bool CardService::Read_bytes_from_block(byte blockAddr, byte *bytes, byte len)
 {
-	logn("Reading block:");
-	logn(blockAddr);
+	//logn("Reading block:");
+	//logn(blockAddr);
 	status = mfrc522.MIFARE_Read(blockAddr, bytes, &len);
 	if (status != MFRC522::STATUS_OK)
 	{
@@ -349,10 +349,10 @@ bool CardService::Read_bytes_from_block(byte blockAddr, byte *bytes, byte len)
 		logn(mfrc522.GetStatusCodeName(status));
 		return false;
 	}
-	logn("Data read:");
-	logn(len);
-	dump_byte_array(bytes, 16);
-	logn();
+	//logn("Data read:");
+	//logn(len);
+	//dump_byte_array(bytes, 16);
+	//logn();
 	return true;
 }
 

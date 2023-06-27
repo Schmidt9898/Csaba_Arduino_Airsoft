@@ -20,43 +20,51 @@ Profile temp_profile;
 // DO NOT GIVE BIGGER NAME THAN THIS, IT WILL CAUSE THE SD CARD TO GO KERNEL PANIC
 #define LOGFILE_NAME "TERM0.log"
 
-#define button_pin_p1 A3
-#define button_pin_p2 A4
-#define button_pin_p5 A5
-#define button_pin_m1 A6
-#define button_pin_m2 A7
-#define button_pin_m3 A8
-#define button_pin_enter A9
+#define button_pin_enter A0
+#define button_pin_cancel A1
+#define button_pin_p1 A2
+#define button_pin_p2 A3
+#define button_pin_p3 A4
+#define button_pin_m1 A5
+#define button_pin_m2 A6
+#define button_pin_m3 A7
 
-#define zold_pin A0
-#define sarga_pin A1
-#define piros_pin A2
+//#define zold_pin A0
+//#define sarga_pin A1
+#define piros_pin 7
 
-LED led_zold(zold_pin);
-LED led_sarga(sarga_pin);
+//LED led_zold(zold_pin);
+//LED led_sarga(sarga_pin);
 LED led_piros(piros_pin);
 
 Button btn_p1(button_pin_p1);
 Button btn_p2(button_pin_p2);
-Button btn_p5(button_pin_p5);
+Button btn_p3(button_pin_p3);
 Button btn_m1(button_pin_m1);
 Button btn_m2(button_pin_m2);
 Button btn_m3(button_pin_m3);
 Button btn_enter(button_pin_enter);
+Button btn_cancel(button_pin_cancel);
+
+
+#define value_1 100
+#define value_2 200
+#define value_3 500
 
 
 void Error_loop()
 {
 	lcd_write("Syst. init fail", "Restart device!");
-	led_zold.turn(on);
-	led_sarga.turn(off);
+	//led_zold.turn(on);
+	//led_sarga.turn(off);
 	led_piros.turn(off);
 	while (1)
 	{
-		led_zold.togle();
-		led_sarga.togle();
+		//led_zold.togle();
+		//led_sarga.togle();
 		led_piros.togle();
 		delay(200);
+
 	}
 }
 
@@ -73,7 +81,7 @@ void setup()
 		Error_loop();
 	}
 
-	led_zold.turn(on); // if all good green led turned on
+	//led_zold.turn(on); // if all good green led turned on
 	logn("Connected!");
 	
 	pinMode(BUZZER, OUTPUT); // Set buzzer - pin 8 as an output //MOVE TO DISPLAY
@@ -81,72 +89,146 @@ void setup()
   
 }
 
+
+uint32_t next_check_time = 0;
+
+
+
+char str_[100];
+
 void loop()
 {
 	
 clear_card:
-	led_sarga.turn(off);
+	//led_sarga.turn(off);
 	led_piros.turn(off);
-	led_zold.turn(on);
+	//led_zold.turn(on);
+
 	logn("Waiting for Card.");
-	lcd_write("Helyezd be", "      a kartyat.");
+	//lcd_write("Hello Stalker!", "",lcd0);
+	lcd_write("Kartya", "  Kereses",lcd1);
+
+	short offset = 0;
+
 	while (true)
 	{
+
+		if(next_check_time <= millis()){
 		if (cardservice.Get_new_card())
 			break;
 		if (cardservice.Check_card())
 			break;
-		delay(1000);
+			next_check_time = millis() + 1000;
+		}
+		delay(500);
+
+
+   		lcd0.clear();
+        lcd0.setCursor(0, 0);
+        lcd0.print("Hello Stalker!");
+    	lcd0.setCursor(0, 1);
+  		lcd0.print(&"Kerlek helyezd be a kartyat"[offset%=28]);
+      	offset++;
 	}
 	cardservice.Read_profile_from_card(&temp_profile);
 	temp_profile.print();
 
 
-	// megvárjuk a gombnyomást
-	logn("Waiting for Button press.");
-	lcd_write(temp_profile.name, "Termeles inditas");
-	led_sarga.turn(on);
+int32_t cost = 0;
+bool update = true;
+
+
+button_pressing:
+/////////////////////
+///Kártya behelyezve/
+/////////////////////
+
+	//led_sarga.turn(on);
+	
 	while (true)
 	{
-		if (cardservice.Check_card())
-		{
-			if (!digitalRead(button_pin))
-			{
-				if (!isbuttonDown)
-				{
-					isbuttonDown = true; // ha leragasztják a gombot akkor ez meggátolja a további elfogadást
-					logn("pressed");
-					delay(100); //  button transient noise canceling delay.
-					goto termeles;
-				}
-			}
-			else
-			{
-				isbuttonDown = false;
-			}
-			delay(200);
-			log(".");
+		if(next_check_time <= millis()){
+      logn("check");
+			if (!cardservice.Check_card())
+				return;
+			next_check_time = millis() + 200;
 		}
-		else
-		{
-			// we lost the card go to idle
-			return; // same as goto clear_card
-					// goto clear_card;
-		}
+
+		if(btn_p1.GetState() == ButtonState::Pressed ){cost+= value_1 ; beep(0); update = true; }
+		if(btn_p2.GetState() == ButtonState::Pressed ){cost+= value_2 ; beep(0); update = true; }
+		if(btn_p3.GetState() == ButtonState::Pressed ){cost+= value_3 ; beep(0); update = true; }
+		if(btn_m1.GetState() == ButtonState::Pressed ){cost+= - value_1 ; beep(0); update = true; }
+		if(btn_m2.GetState() == ButtonState::Pressed ){cost+= - value_2 ; beep(0); update = true; }
+		if(btn_m3.GetState() == ButtonState::Pressed ){cost+= - value_3 ; beep(0); update = true; }
+		if(btn_enter.GetState() == ButtonState::Pressed )
+			{
+				goto transaction;
+			}
+		if(btn_cancel.GetState() == ButtonState::Pressed )
+			{
+				cost = 0;
+				update = true;
+				beep(1);
+			}
+
+			if(update)
+			{
+				update = false;
+
+
+			lcd0.clear();
+			lcd0.setCursor(0, 0);
+
+			static char buff[17];
+			sprintf(buff,"Egyen: %d",temp_profile.balance);
+			lcd0.print(buff);
+
+
+			sprintf(buff,"Terh: %d",cost);
+
+			lcd0.setCursor(0, 1);
+			lcd0.print(buff);
+			//lcd_write("Kartya:",buff,lcd0);
+
+
+
+			}
+
+		delay(10);
 	}
 
-termeles:
+transaction:
 
 	// pénz kell a kártyára írni
 	led_piros.turn(on);
 	logn("Transaction.");
  
 	int32_t previous_balance = temp_profile.balance;
-	temp_profile.balance += termeles_jutalom;
+
+
+	//ellenörzés, hogy biztos megcsinálható e
+	if(previous_balance + cost < 0){
+		//nem mehetünk minuszba
+
+		beep(4);
+
+		//TDO write to lcd
+
+		delay(2000);
+		led_piros.turn(off);
+		goto button_pressing;
+	}
+
+
+	temp_profile.balance += cost;
 	temp_profile.transaction_count += 1;
 
 	if (!cardservice.Write_profile_to_card(&temp_profile))
 	{
+		temp_profile.balance = previous_balance;
+		temp_profile.transaction_count--;
+
+
 		// profile save failure, something went wrong
 		lcd_write("Transaction fail", "Contact IT");
 		delay(5000);
@@ -154,7 +236,8 @@ termeles:
 		delay(5000);
 		return;
 	}
- 	delay(1000);
+
+ 	delay(100);
  
 	if (!cardservice.Check_card())
 	{
@@ -172,8 +255,13 @@ termeles:
 
 	//"aaaaaaaaaaaaaaaa,4294967296,4294967296,-2147483648,-2147483648,-2147483648R"
 
-	sprintf(str,"%s,%lu,%lu,%ld,%d,%ld\n",temp_profile.name,temp_profile.uid,temp_profile.transaction_count,previous_balance,termeles_jutalom,temp_profile.balance); // csv format
+	sprintf(str,"%s,%lu,%lu,%ld,%d,%ld\n",temp_profile.name,temp_profile.uid,temp_profile.transaction_count,previous_balance,cost,temp_profile.balance); // csv format
 
 	logn(String(str));
-	Log2file(LOGFILE_NAME, str);
+	//Log2file(LOGFILE_NAME, str);
+
+
+/*
+*/
+
 }

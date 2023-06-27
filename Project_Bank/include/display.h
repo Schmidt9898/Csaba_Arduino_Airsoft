@@ -44,6 +44,8 @@ void lcd_write(const char *line0_, const char *line1_ , LiquidCrystal_I2C &lcd =
 	lcd.setCursor(0, 1);
 	lcd.print(line1_);
 }
+
+
 void lcd_char(char c, short row, short col, LiquidCrystal_I2C &lcd = lcd0)
 {
 	lcd.setCursor(col, row);
@@ -88,6 +90,8 @@ void beep(uint8_t i)
 		tone(BUZZER, 808, 100);
 	else if (i == 3)
 		tone(BUZZER, 404, 500);
+	else if (i == 4)
+		tone(BUZZER, 808, 1000);
 }
 
 #endif

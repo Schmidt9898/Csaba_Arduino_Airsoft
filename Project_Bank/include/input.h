@@ -20,7 +20,7 @@ struct Button
 		if(isdown ^ val)
 		{
 			isdown = val;
-			delay(100); //  button transient noise canceling delay.
+			delay(50); //  button transient noise canceling delay.
 			if(isdown)
 				return ButtonState::Pressed;
 			else
