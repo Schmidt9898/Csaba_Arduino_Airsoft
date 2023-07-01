@@ -2,6 +2,8 @@
 #define S_DISPLAY
 
 #include <Wire.h>
+#include "pitches.h"
+
 
 #include "log.h"
 
@@ -92,6 +94,24 @@ void beep(uint8_t i)
 		tone(BUZZER, 404, 500);
 	else if (i == 4)
 		tone(BUZZER, 808, 1000);
+	else if (i == 5)
+	{
+		tone(BUZZER, NOTE_A5, 200);
+		delay(200);
+		tone(BUZZER, NOTE_A4, 200);
+		delay(200);
+		tone(BUZZER, NOTE_C6, 400);
+		//delay(400);
+	}
+		else if (i == 6)
+	{
+		tone(BUZZER, NOTE_A4, 100);
+		delay(200);
+		tone(BUZZER, NOTE_A4, 100);
+		delay(200);
+		tone(BUZZER, NOTE_C6, 200);
+		//delay(200);
+	}
 }
 
 #endif

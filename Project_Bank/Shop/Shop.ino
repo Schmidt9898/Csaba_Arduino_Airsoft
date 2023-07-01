@@ -85,16 +85,23 @@ void setup()
 	logn("Connected!");
 	
 	pinMode(BUZZER, OUTPUT); // Set buzzer - pin 8 as an output //MOVE TO DISPLAY
-	beep(3);
-  
+	//beep(3);
+
+	beep(5);
+
+	//delay(1000);
+
+
+
+	//tone(BUZZER, 808, 1000);
+
+
 }
 
 
 uint32_t next_check_time = 0;
 
 
-
-char str_[100];
 
 void loop()
 {
@@ -105,8 +112,7 @@ clear_card:
 	//led_zold.turn(on);
 
 	logn("Waiting for Card.");
-	//lcd_write("Hello Stalker!", "",lcd0);
-	lcd_write("Kartya", "  Kereses",lcd1);
+	lcd_write("Kartya", "  Kereses");
 
 	short offset = 0;
 
@@ -123,11 +129,11 @@ clear_card:
 		delay(500);
 
 
-   		lcd0.clear();
-        lcd0.setCursor(0, 0);
-        lcd0.print("Hello Stalker!");
-    	lcd0.setCursor(0, 1);
-  		lcd0.print(&"Kerlek helyezd be a kartyat"[offset%=28]);
+   		lcd1.clear();
+        lcd1.setCursor(0, 0);
+        lcd1.print("Hello Stalker!");
+    	lcd1.setCursor(0, 1);
+  		lcd1.print(&"Kerlek helyezd be a kartyat"[offset%=28]);
       	offset++;
 	}
 	cardservice.Read_profile_from_card(&temp_profile);
@@ -148,20 +154,21 @@ button_pressing:
 	while (true)
 	{
 		if(next_check_time <= millis()){
-      logn("check");
+      //logn("check");
 			if (!cardservice.Check_card())
 				return;
 			next_check_time = millis() + 200;
 		}
 
-		if(btn_p1.GetState() == ButtonState::Pressed ){cost+= value_1 ; beep(0); update = true; }
-		if(btn_p2.GetState() == ButtonState::Pressed ){cost+= value_2 ; beep(0); update = true; }
-		if(btn_p3.GetState() == ButtonState::Pressed ){cost+= value_3 ; beep(0); update = true; }
+		if(btn_p1.GetState() == ButtonState::Pressed ){cost+=   value_1 ; beep(0); update = true; }
+		if(btn_p2.GetState() == ButtonState::Pressed ){cost+=   value_2 ; beep(0); update = true; }
+		if(btn_p3.GetState() == ButtonState::Pressed ){cost+=   value_3 ; beep(0); update = true; }
 		if(btn_m1.GetState() == ButtonState::Pressed ){cost+= - value_1 ; beep(0); update = true; }
 		if(btn_m2.GetState() == ButtonState::Pressed ){cost+= - value_2 ; beep(0); update = true; }
 		if(btn_m3.GetState() == ButtonState::Pressed ){cost+= - value_3 ; beep(0); update = true; }
 		if(btn_enter.GetState() == ButtonState::Pressed )
 			{
+				update = true;
 				goto transaction;
 			}
 		if(btn_cancel.GetState() == ButtonState::Pressed )
@@ -176,19 +183,17 @@ button_pressing:
 				update = false;
 
 
-			lcd0.clear();
-			lcd0.setCursor(0, 0);
+			lcd0.clear();lcd1.clear();
+			lcd0.setCursor(0, 0);lcd1.setCursor(0, 0);
 
 			static char buff[17];
 			sprintf(buff,"Egyen: %d",temp_profile.balance);
-			lcd0.print(buff);
+			lcd0.print(buff);lcd1.print(buff);
 
 
 			sprintf(buff,"Terh: %d",cost);
-
-			lcd0.setCursor(0, 1);
-			lcd0.print(buff);
-			//lcd_write("Kartya:",buff,lcd0);
+			lcd0.setCursor(0, 1);lcd1.setCursor(0, 1);
+			lcd0.print(buff);lcd1.print(buff);
 
 
 
@@ -198,6 +203,12 @@ button_pressing:
 	}
 
 transaction:
+
+	if(cost == 0)
+	{
+		goto button_pressing;
+	}
+
 
 	// pénz kell a kártyára írni
 	led_piros.turn(on);
@@ -213,8 +224,10 @@ transaction:
 		beep(4);
 
 		//TDO write to lcd
+		lcd_write("Hiba! Nincs eleg", " fedezet!",lcd0);
+		lcd_write("Hiba! Nincs eleg", " fedezet!",lcd1);
 
-		delay(2000);
+		delay(5000);
 		led_piros.turn(off);
 		goto button_pressing;
 	}
@@ -236,6 +249,7 @@ transaction:
 		delay(5000);
 		return;
 	}
+  	beep(6);
 
  	delay(100);
  
@@ -246,6 +260,10 @@ transaction:
 
 	temp_profile.print();
 
+
+	#ifdef USESERIAL
+
+
 	// 16 + 1 +
 	static char str[80];
 	//  log to card
@@ -254,14 +272,11 @@ transaction:
 	// 4294967296
 
 	//"aaaaaaaaaaaaaaaa,4294967296,4294967296,-2147483648,-2147483648,-2147483648R"
-
-	sprintf(str,"%s,%lu,%lu,%ld,%d,%ld\n",temp_profile.name,temp_profile.uid,temp_profile.transaction_count,previous_balance,cost,temp_profile.balance); // csv format
+logn(temp_profile.balance);
+	sprintf(str,"%s,%lu,%lu,%ld,%ld,%ld\n",temp_profile.name,temp_profile.uid,temp_profile.transaction_count,previous_balance,cost,temp_profile.balance); // csv format
 
 	logn(String(str));
 	//Log2file(LOGFILE_NAME, str);
-
-
-/*
-*/
+	#endif
 
 }
