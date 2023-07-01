@@ -14,6 +14,10 @@ namespace UsbManagger
         {
             SerialPort usb = null;
 
+
+            String abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            int idx = 0;
+
             bool can_continue = false;
 
             for (int i = 0; i < 10; i++)
@@ -39,7 +43,7 @@ namespace UsbManagger
 
                         if (cleaned.Contains("Waiting for profile"))
                         {
-                            String utf8string = "c card cccc";
+                            String utf8string = abc[idx++%26] + " kartya";
                             uint balance = 0;
                             uint transaction = 0; // transaction count we dont realy need this
 

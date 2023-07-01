@@ -21,11 +21,11 @@ Profile temp_profile;
 // DO NOT GIVE BIGGER NAME THAN THIS, IT WILL CAUSE THE SD CARD TO GO KERNEL PANIC
 #define LOGFILE_NAME "TERM0.log"
 
-#define button_pin A3
+#define button_pin A0
 
-#define zold_pin A0
-#define sarga_pin A1
-#define piros_pin A2
+#define zold_pin 5
+#define sarga_pin 6
+#define piros_pin 7
 
 #define termeles_jutalom 500
 
