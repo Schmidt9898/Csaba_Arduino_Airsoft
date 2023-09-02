@@ -23,9 +23,9 @@ Profile temp_profile;
 
 #define button_pin A0
 
-#define zold_pin 5
-#define sarga_pin 6
-#define piros_pin 7
+#define zold_pin A1
+#define sarga_pin A2
+#define piros_pin A3
 
 #define termeles_jutalom 500
 
@@ -100,7 +100,7 @@ clear_card:
 	temp_profile.print();
 	// megvárjuk a gombnyomást
 	logn("Waiting for Button press.");
-	lcd_write(temp_profile.name, "Termeles inditas");
+	lcd_write(temp_profile.name, "Felt. inditas");
 	led_sarga.turn(on);
 	while (true)
 	{
@@ -135,7 +135,7 @@ termeles:
  
 	led_sarga.turn(on);
 	uint32_t end_time = millis() + 1000 * termeles_time;
-	lcd_write("Termeles:", "");
+	lcd_write("Feltoltes:", "");
 	while (millis() < end_time)
 	{
 		int segment = int(16 - 16 * (float(end_time - millis()) / float(1000 * termeles_time)));
@@ -156,6 +156,7 @@ termeles:
 		lcd_char('#', 1, segment);
 		led_sarga.togle();
 		delay(500);
+		beep(3);
 		// tune(100)
 	}
 	led_sarga.turn(off);

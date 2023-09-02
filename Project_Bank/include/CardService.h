@@ -10,8 +10,8 @@
 
 #ifdef ARDUINO_AVR_MEGA2560
 #define SD_CS_PIN 4 // Configurable, see typical pin layout above
-#define RST_PIN 5	// Configurable, see typical pin layout above
-#define SS_PIN 6	// Configurable, see typical pin layout above
+#define RST_PIN 9	// Configurable, see typical pin layout above
+#define SS_PIN 10	// Configurable, see typical pin layout above
 #endif
 #ifdef ARDUINO_AVR_NANO
 #define SD_CS_PIN 4 // Configurable, see typical pin layout above

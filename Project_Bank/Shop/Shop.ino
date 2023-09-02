@@ -24,18 +24,18 @@ Profile temp_profile;
 #define button_pin_cancel A1
 #define button_pin_p1 A2
 #define button_pin_p2 A3
-#define button_pin_p3 A4
-#define button_pin_m1 A5
-#define button_pin_m2 A6
-#define button_pin_m3 A7
+#define button_pin_p3 6
+#define button_pin_m1 7
+#define button_pin_m2 5
+#define button_pin_m3 4
 
 //#define zold_pin A0
 //#define sarga_pin A1
-#define piros_pin 7
+//#define piros_pin 7
 
 //LED led_zold(zold_pin);
 //LED led_sarga(sarga_pin);
-LED led_piros(piros_pin);
+//LED led_piros(piros_pin);
 
 Button btn_p1(button_pin_p1);
 Button btn_p2(button_pin_p2);
@@ -57,12 +57,12 @@ void Error_loop()
 	lcd_write("Syst. init fail", "Restart device!");
 	//led_zold.turn(on);
 	//led_sarga.turn(off);
-	led_piros.turn(off);
+	//led_piros.turn(off);
 	while (1)
 	{
 		//led_zold.togle();
 		//led_sarga.togle();
-		led_piros.togle();
+		//led_piros.togle();
 		delay(200);
 
 	}
@@ -108,7 +108,7 @@ void loop()
 	
 clear_card:
 	//led_sarga.turn(off);
-	led_piros.turn(off);
+	//led_piros.turn(off);
 	//led_zold.turn(on);
 
 	logn("Waiting for Card.");
@@ -211,7 +211,7 @@ transaction:
 
 
 	// pénz kell a kártyára írni
-	led_piros.turn(on);
+	//led_piros.turn(on);
 	logn("Transaction.");
  
 	int32_t previous_balance = temp_profile.balance;
@@ -228,7 +228,7 @@ transaction:
 		lcd_write("Hiba! Nincs eleg", " fedezet!",lcd1);
 
 		delay(5000);
-		led_piros.turn(off);
+		//led_piros.turn(off);
 		goto button_pressing;
 	}
 
