@@ -6,15 +6,16 @@
 #include "log.h"
 #include "pitches.h"
 #include <Keypad.h>
-#include  <virtuabotixRTC.h>
+//#include  <virtuabotixRTC.h>
 
 
 
 #define INSTALL_PIN 11
-#define INSTALL_TIME 10 * 60 * 1000
-#define START_WAIT_BEFORE_MOTION 5 *1000
-#define WAIT_BEFORE_START_ALERT 15 * 1000
-#define WAIT_BEFORE_NEXT_START_CYCLE 10*60*1000
+#define INSTALL_TIME 10L * 60L * 1000L
+#define START_WAIT_BEFORE_MOTION 5L * 1000L
+#define WAIT_BEFORE_START_ALERT 15L * 1000L
+#define WAIT_BEFORE_NEXT_START_CYCLE 10L*60L*1000L
+
 
 #define HANG_1 A0
 #define HANG_2 A1
@@ -118,8 +119,8 @@ void loop()
 	while(!digitalRead(MOTION_SENSOR)){delay(50);}; // Wait for motion
 
 	bool is_alert_active = false;
-	time_t next_alert_time = millis() + WAIT_BEFORE_START_ALERT;
-	time_t next_led_togle = millis();
+	uint32_t next_alert_time = millis() + WAIT_BEFORE_START_ALERT;
+	uint32_t next_led_togle = millis();
 
 	while(true)
 	{
@@ -179,10 +180,10 @@ void play_audio(int i){
 
 void install_loop()
 {
-	if(digitalReaad(INSTALL_PIN) != LOW)return;
+	if(digitalRead(INSTALL_PIN) != LOW)return;
 
 							//	 min  sec  millis
-	time_t end_time = millis() + INSTALL_TIME;
+	uint32_t end_time = millis() + INSTALL_TIME;
 
 	logn("Install cycle!");
 	LED_R.turn(ON);
@@ -269,6 +270,3 @@ else if (i == BEEP_GOOD_PASS){
 	else if (i == 4)
 		tone(BUZZER, 808, 1000); */
 }
-
-
-
