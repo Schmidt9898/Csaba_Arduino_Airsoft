@@ -8,8 +8,6 @@
 #include <Keypad.h>
 //#include  <virtuabotixRTC.h>
 
-
-
 #define INSTALL_PIN 11
 #define INSTALL_TIME 10L * 60L * 1000L
 #define START_WAIT_BEFORE_MOTION 5L * 1000L
@@ -28,8 +26,6 @@
 
 #define LED_GREEN A6
 #define LED_RED A7
-
-
 
 #define BEEP_CLICK 0
 #define BEEP_START_MELODY 1
@@ -96,6 +92,7 @@ void setup()
 	init_audio();
 	pinMode(BUZZER, OUTPUT);
 
+	pinMode(MOTION_SENSOR, INPUT);
 	pinMode(INSTALL_PIN, INPUT);
 	
 	install_loop();
@@ -110,6 +107,7 @@ void loop()
 {
 	//Start program
 	logn("Program start!");
+	beep(BEEP_START_MELODY); // 2 sec
 	LED_G.turn(ON);
 	LED_R.turn(OFF);
 	play_audio(HANG_1);
@@ -128,8 +126,8 @@ void loop()
 		if( val == -1) // wrong pass
 		{
 			//start HANG_4 alert
-			next_alert_time = millis();
 			beep(BEEP_WRONG_PASS);
+			next_alert_time = millis();
 		}else if (val == 1)
 		{
 			beep(BEEP_GOOD_PASS);
@@ -139,7 +137,7 @@ void loop()
 		{
 			LED_G.turn(OFF); // REMOVABLE just for show
 			is_alert_active = true;
-			next_alert_time += millis() + 30 * 1000;
+			next_alert_time += millis() + 29 * 1000;
 			play_audio(HANG_4);
 		}
 		if(is_alert_active)
@@ -156,12 +154,7 @@ void loop()
 	LED_G.turn(ON);
 	LED_R.turn(OFF);
 	delay(WAIT_BEFORE_NEXT_START_CYCLE);
-
-
 }
-
-
-
 
 void init_audio(){
 	for(int i = HANG_1;i<HANG_1+HANG_N;i++)
@@ -192,6 +185,7 @@ void install_loop()
 	{
 		//wait do some ticking
 		delay(200);
+		beep(BEEP_INSTALL_TICK);
 		LED_G.toggle();
 		LED_R.toggle();
 	}
@@ -244,7 +238,7 @@ else if (i == BEEP_START_MELODY){
 	tone( BUZZER,NOTE_E5,400);delay(400); 
 	tone( BUZZER,NOTE_G5,400);delay(400); 
 	tone( BUZZER,NOTE_F5,400);delay(400); 
-	tone( BUZZER,NOTE_E5,400);delay(400); 
+	tone( BUZZER,NOTE_E5,400);//delay(400); 
 }
 else if (i == BEEP_INSTALL_TICK){
 	tone(BUZZER, 808, 100);
@@ -252,12 +246,12 @@ else if (i == BEEP_INSTALL_TICK){
 else if (i == BEEP_WRONG_PASS){
 	tone( BUZZER,NOTE_E2,100);delay(100);
 	tone( BUZZER,NOTE_D2,100);delay(100);
-	tone( BUZZER,NOTE_C2,500);delay(500);
+	tone( BUZZER,NOTE_C2,500);//delay(500);
 }
 else if (i == BEEP_GOOD_PASS){
 	tone( BUZZER,NOTE_C6,100);delay(100);
 	tone( BUZZER,NOTE_D6,100);delay(100);
-	tone( BUZZER,NOTE_E6,500);delay(500);
+	tone( BUZZER,NOTE_E6,500);//delay(500);
 }
 
 /* 	if (i == 0)
