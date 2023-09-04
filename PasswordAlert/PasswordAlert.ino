@@ -93,7 +93,7 @@ void setup()
 	pinMode(BUZZER, OUTPUT);
 
 	pinMode(MOTION_SENSOR, INPUT);
-	pinMode(INSTALL_PIN, INPUT);
+	pinMode(INSTALL_PIN, INPUT_PULLUP);
 	
 	install_loop();
 
