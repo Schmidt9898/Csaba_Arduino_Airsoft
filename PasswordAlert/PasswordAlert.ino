@@ -24,8 +24,8 @@
 #define MOTION_SENSOR A4
 #define BUZZER A5
 
-#define LED_GREEN A6
-#define LED_RED A7
+#define LED_GREEN 12
+#define LED_RED 13
 
 #define BEEP_CLICK 0
 #define BEEP_START_MELODY 1
@@ -116,6 +116,9 @@ void loop()
 
 	while(!digitalRead(MOTION_SENSOR)){delay(50);}; // Wait for motion
 
+	play_audio(HANG_2);
+
+
 	bool is_alert_active = false;
 	uint32_t next_alert_time = millis() + WAIT_BEFORE_START_ALERT;
 	uint32_t next_led_togle = millis();
@@ -127,7 +130,8 @@ void loop()
 		{
 			//start HANG_4 alert
 			beep(BEEP_WRONG_PASS);
-			next_alert_time = millis();
+			if(!is_alert_active)
+				next_alert_time = millis();
 		}else if (val == 1)
 		{
 			beep(BEEP_GOOD_PASS);
@@ -137,7 +141,7 @@ void loop()
 		{
 			LED_G.turn(OFF); // REMOVABLE just for show
 			is_alert_active = true;
-			next_alert_time += millis() + 29 * 1000;
+			next_alert_time = millis() + 29 * 1000;
 			play_audio(HANG_4);
 		}
 		if(is_alert_active)
