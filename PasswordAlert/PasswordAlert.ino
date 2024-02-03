@@ -114,7 +114,7 @@ void loop()
 
 	delay(START_WAIT_BEFORE_MOTION);
 
-	while(!digitalRead(MOTION_SENSOR)){delay(50);}; // Wait for motion
+	while(digitalRead(MOTION_SENSOR)!=HIGH){delay(50);}; // Wait for motion
 
 	play_audio(HANG_2);
 
