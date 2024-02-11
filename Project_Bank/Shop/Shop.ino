@@ -187,11 +187,11 @@ button_pressing:
 			lcd0.setCursor(0, 0);lcd1.setCursor(0, 0);
 
 			static char buff[17];
-			sprintf(buff,"Egyen: %d",temp_profile.balance);
+			sprintf(buff,"Egyen: %ld",temp_profile.balance);
 			lcd0.print(buff);lcd1.print(buff);
 
 
-			sprintf(buff,"Terh: %d",cost);
+			sprintf(buff,"Terh: %ld",cost);
 			lcd0.setCursor(0, 1);lcd1.setCursor(0, 1);
 			lcd0.print(buff);lcd1.print(buff);
 

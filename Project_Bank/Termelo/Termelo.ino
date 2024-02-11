@@ -196,7 +196,7 @@ termeles:
 	//  name,uid,transaction_cunt,previous,added,new_balance
 	//longest string is
 	//"aaaaaaaaaaaaaaaa,4294967296,4294967296,-2147483648,-2147483648,-2147483648R"
-	sprintf(str,"%s,%lu,%lu,%ld,%d,%ld\n",temp_profile.name,temp_profile.uid,temp_profile.transaction_count,previous_balance,termeles_jutalom,temp_profile.balance); // csv format
+	sprintf(str,"%s,%lu,%lu,%ld,%ld,%ld\n",temp_profile.name,temp_profile.uid,temp_profile.transaction_count,previous_balance,termeles_jutalom,temp_profile.balance); // csv format
 	logn(String(str));
 #endif
 	//Log2file(LOGFILE_NAME, str);
