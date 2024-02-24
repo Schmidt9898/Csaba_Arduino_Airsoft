@@ -49,6 +49,7 @@ void loop()
 	unsigned char buffer[16];
 	if (Serial.available() >= 32)
 	{
+		temp_profile.uid = 0;
 		// Name
 		Serial.readBytes(buffer, 16);
 		dump_byte_array(buffer, 16);

@@ -20,3 +20,5 @@ usblog/bin/Release/usblog.zip
 PasswordAlert/minta
 Project_Bank/wireing.ods
 PasswordAlert/automat.jpg
+Project_Bank/CardmakerGUI/bin/*
+Project_Bank/CardmakerGUI/obj/*
