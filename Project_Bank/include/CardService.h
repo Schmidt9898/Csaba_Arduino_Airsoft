@@ -26,25 +26,55 @@ MFRC522::MIFARE_Key factory_key{{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}};
 MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522 instance
 MFRC522::StatusCode status;
 
+const int32_t MAX_VALUE =  2147483647;
+
+enum TransactionResult
+{
+  SUCCESS = 1,
+  NOTENOUGH = -1,
+  MAXEDOUT = 2
+};
+
+
 struct Profile
 {
 	char name[16] = "NONAMENO\0";	// max 16 or ends with \0 terminator
 	int32_t balance = 0;			// 4 byte
 	uint32_t transaction_count = 0; // 4 byte
 	uint32_t uid = 0;				// 4 byte from the uid the card
-	/*
-	bool remove(int32_t amount)
-	{
-		if(balance - amount < 0)//cant afford it
-			return false;
 
-		balance-=amount;
-	}
-	bool add(uint32_t amount)
+/* perform the transaction with guard for over and under flowing. Returns true if the transaction is accepted*/
+	TransactionResult add_to_balance(int32_t amount)
 	{
-
+		if (amount >= 0) // addition
+		{
+			if ((MAX_VALUE - balance) < amount) // will overflow
+			{
+				balance = MAX_VALUE;
+				return TransactionResult::MAXEDOUT;
+			}
+			else
+			{
+				balance += amount;
+				transaction_count += 1;
+				return TransactionResult::SUCCESS;
+			}
+		}
+		else // substruction
+		{
+			if (balance < abs(amount)) // we cant do this
+			{
+				return TransactionResult::NOTENOUGH;
+			}
+			else
+			{
+				balance += amount;
+				transaction_count += 1;
+				return TransactionResult::SUCCESS;
+			}
+		}
 	}
-	*/
+
 	void print()
 	{
 		logn("Profile data:");
@@ -57,6 +87,9 @@ struct Profile
 		log("uid ");
 		logn(uid);
 	};
+
+
+
 };
 
 // This is sector 1 DO NOT USE SECTOR 0 !!!!!
