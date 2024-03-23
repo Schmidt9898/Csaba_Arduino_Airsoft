@@ -2,7 +2,6 @@ TODO: Rövidebb kijelzett nevek az összeg mellett, összeg max 10 karakter minu
 TODO: int32_t ből legyen e uint32_t
 TODO: keypad kézi terminál
 TODO: shifting mehjelenítés, keres kiszed
-TODO: kártya gyártó újra élesztése
 
 
 
