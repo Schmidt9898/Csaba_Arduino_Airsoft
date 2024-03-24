@@ -12,6 +12,7 @@ lcd
 #include "include/input.h"
 #include "include/display.h"
 #include "include/CardService.h"
+#include <Keypad.h>
 
 CardService cardservice;
 
@@ -32,83 +33,68 @@ const char keys[ROWS][COLS] = {
   {'7', '8', '9'},
   {'*', '0', '#'}
 };
+
+#define MAXKEYPADINPUT 12
+char key_input[MAXKEYPADINPUT] = {0};
+short key_input_size = 0;
 const byte rowPins[ROWS] = {3, 4, 5, 6}; //2-7-6-4 LÁBAK a D3-D4-D5-D6 PORTRA
 const byte colPins[COLS] = {7, 8, 9}; //3-1-5 LÁBAK a D7-D8-D9 PORTRA
 
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 // TODO add keypad
-
-
-// #define zold_pin A0
-// #define sarga_pin A1
-// #define piros_pin 7
-
-// LED led_zold(zold_pin);
-// LED led_sarga(sarga_pin);
-// LED led_piros(piros_pin);
-
-Button btn_p1(button_pin_p1);
-Button btn_p2(button_pin_p2);
-Button btn_p3(button_pin_p3);
-Button btn_m1(button_pin_m1);
-Button btn_m2(button_pin_m2);
-Button btn_m3(button_pin_m3);
+// Redo pin layout
 Button btn_enter(button_pin_enter);
 Button btn_cancel(button_pin_cancel);
 
-#define value_1 100
-#define value_2 200
-#define value_3 500
 
 void Error_loop()
 {
 	lcd_write("Syst. init fail", "Restart device!");
-	// led_zold.turn(on);
-	// led_sarga.turn(off);
-	// led_piros.turn(off);
 	while (1)
 	{
-		// led_zold.togle();
-		// led_sarga.togle();
-		// led_piros.togle();
 		delay(200);
 	}
 }
 
-int check_password()
+/**
+ * @brief Get the Key Pad Input, returns true if changed
+ * 
+ * @param buff input buffer
+ * @param lenght lenght of the buffer
+ * @param isPositive sign flag
+ */
+bool GetKeyPadInput(char* buff,bool& isPositive,short lenght,short max)
 {
 	char key = keypad.getKey();
 	if (key)
 	{
 		logn("KEY: " + String(key));
 		
-		beep(BEEP_CLICK);
+		//beep(BEEP_CLICK); // TODO redo
 
 		if (key == '*')
-		{ // clear pass
-			input_password = "";
+		{ 
+			// change sign
+			isPositive = !isPositive;
 		}
-		else if (key == '#')// enter
+		else if (key == '#')// backspace, remove one from last
 		{
-			if (input_password == secret_pass)
-			{
-				input_password = "";
-				return 1;
-			}
-			else
-			{
-				input_password = "";
-				return -1;
-			}
+			if(lenght>0)
+				lenght--;
+			buff[lenght] = '\0';
 		}
 		else
 		{
-			input_password += key;
-			log("INPUT FIELD: " + input_password);
+			if(lenght<max)
+			{
+				buff[lenght++] = key;
+				buff[lenght] = '\0';
+			}
 		}
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 
@@ -143,15 +129,14 @@ uint32_t next_check_time = 0;
 void loop()
 {
 
-clear_card:
-	// led_sarga.turn(off);
-	// led_piros.turn(off);
-	// led_zold.turn(on);
+	clear_card:
+
+	temp_profile = Profile();
 
 	logn("Waiting for Card.");
 	lcd_write("Kartya", "  Kereses");
 
-	short offset = 0;
+	//short offset = 0;
 
 	while (true)
 	{
@@ -166,18 +151,19 @@ clear_card:
 		}
 		delay(500);
 
-		lcd1.clear();
-		lcd1.setCursor(0, 0);
-		lcd1.print("Hello Stalker!");
-		lcd1.setCursor(0, 1);
-		lcd1.print(&"Kerlek helyezd be a kartyat"[offset %= 28]);
-		offset++;
+		//lcd1.clear();
+		//lcd1.setCursor(0, 0);
+		//lcd1.print("Hello Stalker!");
+		//lcd1.setCursor(0, 1);
+		//lcd1.print(&"Kerlek helyezd be a kartyat"[offset %= 28]);
+		//offset++;
 	}
 	cardservice.Read_profile_from_card(&temp_profile);
 	temp_profile.print();
 
-	int32_t cost = 0;
+	//int32_t cost = 0;
 	bool update = true;
+	bool isPositive = false;
 
 button_pressing:
 	/////////////////////
@@ -196,42 +182,8 @@ button_pressing:
 			next_check_time = millis() + 200;
 		}
 
-		if (btn_p1.GetState() == ButtonState::Pressed)
-		{
-			cost += value_1;
-			beep(0);
-			update = true;
-		}
-		if (btn_p2.GetState() == ButtonState::Pressed)
-		{
-			cost += value_2;
-			beep(0);
-			update = true;
-		}
-		if (btn_p3.GetState() == ButtonState::Pressed)
-		{
-			cost += value_3;
-			beep(0);
-			update = true;
-		}
-		if (btn_m1.GetState() == ButtonState::Pressed)
-		{
-			cost += -value_1;
-			beep(0);
-			update = true;
-		}
-		if (btn_m2.GetState() == ButtonState::Pressed)
-		{
-			cost += -value_2;
-			beep(0);
-			update = true;
-		}
-		if (btn_m3.GetState() == ButtonState::Pressed)
-		{
-			cost += -value_3;
-			beep(0);
-			update = true;
-		}
+		update = GetKeyPadInput(key_input,isPositive,key_input_size,MAXKEYPADINPUT);
+
 		if (btn_enter.GetState() == ButtonState::Pressed)
 		{
 			update = true;
@@ -239,49 +191,63 @@ button_pressing:
 		}
 		if (btn_cancel.GetState() == ButtonState::Pressed)
 		{
-			cost = 0;
+			key_input[0] = '\0';
+			key_input_size = 0;
+			isPositive = false;
 			update = true;
-			beep(1);
+			//beep(1);
 		}
 
-		if (update) // update 2 lcd screen with new data
+		if (update) // update lcd screen with new data
 		{
 			update = false;
 
 			lcd0.clear();
-			lcd1.clear();
+			//lcd1.clear();
 			lcd0.setCursor(0, 0);
-			lcd1.setCursor(0, 0);
+			//lcd1.setCursor(0, 0);
 
 			static char buff[17];
-			sprintf(buff, "Egyn: %ld", temp_profile.balance);
+			sprintf(buff, "Egyn: %ld", temp_profile.balance); // do we need this refresh?
 			lcd0.print(buff);
-			lcd1.print(buff);
+			//lcd1.print(buff);
 
-			sprintf(buff, "Terh: %ld", cost);
+
+
+			sprintf(buff, "Terh: %s", key_input);
 			lcd0.setCursor(0, 1);
-			lcd1.setCursor(0, 1);
+			//lcd1.setCursor(0, 1);
 			lcd0.print(buff);
-			lcd1.print(buff);
+			//lcd1.print(buff);
 		}
-
-		delay(10);
+		delay(30);
 	}
 
 transaction:
 
-	if (cost == 0)
+
+	long long_value = String(key_input).toInt();
+
+	// if 0 ther may be an error TODO check this
+
+	long_value = constrain(long_value, -MAX_VALUE, MAX_VALUE);
+	// it is save to convert into int32_t
+	int32_t cost_value = int32_t(long_value);
+
+	if (cost_value == 0)
 	{
+		// Maybe error, check TODO
 		goto button_pressing;
 	}
 
+	// All good
 	// pénz kell a kártyára írni
-	// led_piros.turn(on);
+
 	logn("Transaction.");
 
 	int32_t previous_balance = temp_profile.balance;
 
-	auto result = temp_profile.add_to_balance(cost);
+	auto result = temp_profile.add_to_balance(cost_value);
 
 	// ellenörzés, hogy biztos megcsinálható e
 	if (result < 0)
@@ -289,7 +255,7 @@ transaction:
 		beep(4);
 		// TDO write to lcd
 		lcd_write("Hiba! Nincs eleg", " fedezet!", lcd0);
-		lcd_write("Hiba! Nincs eleg", " fedezet!", lcd1);
+		//lcd_write("Hiba! Nincs eleg", " fedezet!", lcd1);
 		delay(5000);
 		// led_piros.turn(off);
 		goto button_pressing;
@@ -298,12 +264,12 @@ transaction:
 	// try to write it to the card
 	if (!cardservice.Write_profile_to_card(&temp_profile))
 	{
-		temp_profile.balance = previous_balance;
-		temp_profile.transaction_count--;
+		//temp_profile.balance = previous_balance;
+		//temp_profile.transaction_count--;
 		// profile save failure, something went wrong
 		lcd_write("Transaction fail", "Contact IT");
 		delay(5000);
-		lcd_write("Device will", "Restart");
+		lcd_write("Device will", "Reset");
 		delay(5000);
 		return;
 	}
@@ -335,9 +301,8 @@ transaction:
 		// 4294967296
 		//"aaaaaaaaaaaaaaaa,4294967296,4294967296,-2147483648,-2147483648,-2147483648R"
 		logn(temp_profile.balance);
-		sprintf(str, "%s,%lu,%lu,%ld,%ld,%ld\n", temp_profile.name, temp_profile.uid, temp_profile.transaction_count, previous_balance, cost, temp_profile.balance); // csv format
+		sprintf(str, "%s,%lu,%lu,%ld,%ld,%ld\n", temp_profile.name, temp_profile.uid, temp_profile.transaction_count, previous_balance, cost_value, temp_profile.balance); // csv format
 		logn(String(str));
-// Log2file(LOGFILE_NAME, str);
 #endif
 	}
 }

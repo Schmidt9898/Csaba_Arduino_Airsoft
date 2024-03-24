@@ -1,6 +1,6 @@
 TODO: Rövidebb kijelzett nevek az összeg mellett, összeg max 10 karakter minuszba nem mehet
-TODO: int32_t ből legyen e uint32_t
-TODO: keypad kézi terminál
+
+TODO: keypad kézi terminál -> build test
 TODO: shifting mehjelenítés, keres kiszed
 
 
