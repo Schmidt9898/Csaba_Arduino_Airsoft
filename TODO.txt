@@ -1,8 +1,10 @@
-TODO: Rövidebb kijelzett nevek az összeg mellett, összeg max 10 karakter minuszba nem mehet
 
-TODO: keypad kézi terminál -> build test
-TODO: shifting mehjelenítés, keres kiszed
 
+TODO: shifting megjelenítés, keres kiszed
+
+TODO: any button pressed feature
+
+TODO: uj hangok
 
 
 
