@@ -36,7 +36,7 @@ const char keys[ROWS][COLS] = {
 char key_input[MAXKEYPADINPUT] = {0};
 short key_input_size = 0;
 const byte rowPins[ROWS] = {3, 4, 5, 6}; // 2-7-6-4 LÁBAK a D3-D4-D5-D6 PORTRA
-const byte colPins[COLS] = {8, 7, 2};	 // 3-1-5 LÁBAK a D7-D8-D9 PORTRA
+const byte colPins[COLS] = {8, 7, 2};	 // 3-1-5 LÁBAK a D8-D7-D2 PORTRA
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
