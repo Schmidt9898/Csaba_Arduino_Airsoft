@@ -192,7 +192,9 @@ public:
 	{
 		byte v = mfrc522.PCD_ReadRegister(MFRC522::PCD_Register::VersionReg);
 		// When 0x00 or 0xFF is returned, communication probably failed
-		if ((v == 0x00) || (v == 0xFF))
+
+		//if ((v == 0x00) || (v == 0xFF))
+		if ((v != 0x92))
 		{
 			logn(F("WARNING: Communication failure, is the MFRC522 properly connected?"));
 			return false;
