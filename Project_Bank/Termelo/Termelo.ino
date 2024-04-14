@@ -27,7 +27,7 @@ Profile temp_profile;
 #define sarga_pin A2
 #define piros_pin A3
 
-#define termeles_jutalom 500
+#define termeles_jutalom 1000
 
 bool isbuttonDown = false;
 
@@ -99,6 +99,7 @@ clear_card:
 	cardservice.Read_profile_from_card(&temp_profile);
 	temp_profile.print();
 	// megvárjuk a gombnyomást
+	beep(AUDIO_CONNECTED);
 	logn("Waiting for Button press.");
 	lcd_write(temp_profile.name, "Felt. inditas");
 	led_sarga.turn(on);
@@ -113,6 +114,7 @@ clear_card:
 					isbuttonDown = true; // ha leragasztják a gombot akkor ez meggátolja a további elfogadást
 					logn("pressed");
 					delay(100); //  button transient noise canceling delay.
+					beep(AUDIO_KEYPRESS_3);
 					goto termeles;
 				}
 			}
@@ -125,6 +127,7 @@ clear_card:
 		}
 		else
 		{
+			beep(AUDIO_DISCONNECTED);
 			// we lost the card go to idle
 			return; // same as goto clear_card
 					// goto clear_card;
@@ -145,6 +148,7 @@ termeles:
 		}
 		else
 		{
+			beep(AUDIO_DISCONNECTED);
 			lcd_write("Kartya elveszett", "Termelesi hiba.");
 			delay(2000);
 			return; // same as goto clear_card
