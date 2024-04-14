@@ -32,11 +32,11 @@ const char keys[ROWS][COLS] = {
 	{'7', '8', '9'},
 	{'*', '0', '#'}};
 
-#define MAXKEYPADINPUT 12
+#define MAXKEYPADINPUT 10
 char key_input[MAXKEYPADINPUT] = {0};
 short key_input_size = 0;
-const byte rowPins[ROWS] = {3, 4, 5, 6}; // 2-7-6-4 LÁBAK a D3-D4-D5-D6 PORTRA
-const byte colPins[COLS] = {8, 7, 2};	 // 3-1-5 LÁBAK a D8-D7-D2 PORTRA
+const byte rowPins[ROWS] = {3, 8, 7, 5}; // 2-7-6-4 LÁBAK a D3-D4-D5-D6 PORTRA
+const byte colPins[COLS] = {4, 2, 6};	 // 3-1-5 LÁBAK a D8-D7-D2 PORTRA
 
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
@@ -94,7 +94,11 @@ bool GetKeyPadInput(char *buff, bool &isPositive, short &lenght, short max)
 			{
 				buff[lenght++] = key;
 				buff[lenght] = '\0';
+			}else
+			{
+				beep(AUDIO_KEYPRESS_4);
 			}
+				
 		}
 		//logn("keys: " + String(key_input));
 		return true;
@@ -158,7 +162,7 @@ clear_card:
 
 	// int32_t cost = 0;
 	bool update = true;
-	bool isPositive = false;
+	bool isPositive = true;
 
 	key_input[0] = '\0';
 	key_input_size = 0;
@@ -196,7 +200,7 @@ button_pressing:
 		{
 			key_input[0] = '\0';
 			key_input_size = 0;
-			isPositive = false;
+			//isPositive = ;
 			update = true;
 			beep(AUDIO_KEYPRESS_3);
 			logn("cancel");
@@ -230,14 +234,20 @@ transaction:
 	long long_value = String(key_input).toInt() * (isPositive ? 1 : -1);
 
 	// if 0 ther may be an error TODO check this
+	logn(String(String(key_input)));
+	logn(String(String(key_input).toInt()));
+	logn(String(long_value));
 
 	long_value = constrain(long_value, -MAX_VALUE, MAX_VALUE);
+	logn(String(long_value));
 	// it is save to convert into int32_t
 	int32_t cost_value = int32_t(long_value);
 
 	if (cost_value == 0)
 	{
 		// Maybe error, check TODO
+		key_input[0] = '\0';
+		key_input_size = 0;
 		goto button_pressing;
 	}
 

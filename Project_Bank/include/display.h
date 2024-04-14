@@ -87,6 +87,7 @@ struct LED
 #define AUDIO_KEYPRESS_1 0
 #define AUDIO_KEYPRESS_2 1
 #define AUDIO_KEYPRESS_3 2
+#define AUDIO_KEYPRESS_4 10
 #define AUDIO_KEYPRESS AUDIO_KEYPRESS_1
 #define AUDIO_ERROR 3
 #define AUDIO_ERROR2 4
@@ -103,6 +104,8 @@ void beep(uint8_t i)
 		tone(BUZZER, 2000, 100);
 	else if (i == 1)
 		tone(BUZZER, 1000, 200);
+	else if (i == 10)
+		tone(BUZZER, 300, 200);
 	else if (i == 2)
 		tone(BUZZER, 808, 100);
 	else if (i == 3)
