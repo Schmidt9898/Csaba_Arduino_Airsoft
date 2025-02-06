@@ -1,25 +1,25 @@
 #include <EEPROM.h>
 
-#define BTN_0 A1
-#define BTN_1 A1
-#define BTN_2 A1
-#define BTN_3 A1
-#define BTN_RESET A1
-#define BTN_ENTER A1
+#define BTN_0 2
+#define BTN_1 3
+#define BTN_2 4
+#define BTN_3 5
+#define BTN_RESET 6
+#define BTN_ENTER 7
 
-#define LED_STATUS A0
+#define LED_STATUS 8
 
-#define BUZZER A2
+#define BUZZER 9
 
-#define TRAC_A1 A0
-#define TRAC_A2 A0
-#define TRAC_A3 A0
-#define TRAC_A4 A0
-#define TRAC_A5 A0
-#define TRAC_A6 A0
-#define TRAC_A7 A0
-#define TRAC_A8 A0
-#define TRAC_A9 A0
+#define TRAC_A1 A1
+#define TRAC_A2 A2
+#define TRAC_A3 A3
+#define TRAC_A4 A4
+#define TRAC_A5 A5
+#define TRAC_A6 A6
+#define TRAC_A7 A7
+#define TRAC_A8 11
+#define TRAC_A9 12
 
 #define TRAC_LEN_MS_A1 4000
 #define TRAC_LEN_MS_A2 1000
