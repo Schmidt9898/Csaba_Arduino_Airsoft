@@ -1,4 +1,4 @@
-include <EEPROM.h>
+#include <EEPROM.h>
 
 #define BTN_0 A1
 #define BTN_1 A1
@@ -35,7 +35,7 @@ include <EEPROM.h>
 
 #define PENALTY_TIME_MIN 0
 
-uint8 penalty_time_left = 0;
+uint8_t penalty_time_left = 0;
 
 void beep()
 {
@@ -44,10 +44,10 @@ void beep()
 }
 
 
-void play_audio(int pin,unsigned int duration){
-  digitalWrite(TRAC_A1, 0);
+void play_audio(unsigned int pin,unsigned int duration){
+  digitalWrite(pin, LOW);
   delay(50);
-  digitalWrite(TRAC_A1, 1);
+  digitalWrite(pin, HIGH);
   delay(duration);
 }
 
@@ -69,7 +69,7 @@ uint8_t code7[CODE_LEN] = {0,0,0,0,0,0};
 
 void setup() {
 
-  penalty_time_left = EEPROM.get(0);
+  EEPROM.get(0,penalty_time_left);
   penalty_state();
 
   Serial.begin(9600);
@@ -94,6 +94,15 @@ void setup() {
   pinMode(TRAC_A7, OUTPUT);
   pinMode(TRAC_A8, OUTPUT);
   pinMode(TRAC_A9, OUTPUT);
+  digitalWrite(TRAC_A1, HIGH);
+  digitalWrite(TRAC_A2, HIGH);
+  digitalWrite(TRAC_A3, HIGH);
+  digitalWrite(TRAC_A4, HIGH);
+  digitalWrite(TRAC_A5, HIGH);
+  digitalWrite(TRAC_A6, HIGH);
+  digitalWrite(TRAC_A7, HIGH);
+  digitalWrite(TRAC_A8, HIGH);
+  digitalWrite(TRAC_A9, HIGH);
 
   pinMode(LED_STATUS, OUTPUT);
 
@@ -125,7 +134,7 @@ void code_error(){
   play_audio(TRAC_A2,TRAC_LEN_MS_A2);
   penalty_time_left = PENALTY_TIME_MIN;
   EEPROM.write(0, penalty_time_left);
-  penalty_state()
+  penalty_state();
 }
 
 
