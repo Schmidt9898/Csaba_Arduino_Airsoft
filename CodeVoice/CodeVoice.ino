@@ -18,8 +18,8 @@
 #define TRAC_A3 A3
 #define TRAC_A4 A4
 #define TRAC_A5 A5
-#define TRAC_A6 8
-#define TRAC_A7 A6
+//#define TRAC_A6 8
+#define TRAC_A7 8
 #define TRAC_A8 11
 #define TRAC_A9 12
 
@@ -27,8 +27,8 @@
 #define TRAC_LEN_MS_A2 1000   // code 2
 #define TRAC_LEN_MS_A3 1000   // code 3
 #define TRAC_LEN_MS_A4 1000   // code 4
-#define TRAC_LEN_MS_A5 1000   // code 5
-#define TRAC_LEN_MS_A6 300000 // code 6 //5perc, 300mp, 300000 milisec
+#define TRAC_LEN_MS_A5 300000 // code 5 //5perc, 300mp, 300000 milisec
+//#define TRAC_LEN_MS_A6 1000   // code 6
 #define TRAC_LEN_MS_A7 4000   // welcome
 #define TRAC_LEN_MS_A8 1000   // code error
 #define TRAC_LEN_MS_A9 1000   // startup penalty
@@ -41,8 +41,8 @@ uint8_t code1[CODE_LEN] = {1,2,4,2,3,3};
 uint8_t code2[CODE_LEN] = {1,2,3,4,2,2};
 uint8_t code3[CODE_LEN] = {4,3,1,2,4,2};
 uint8_t code4[CODE_LEN] = {0,0,0,0,0,0};
-uint8_t code5[CODE_LEN] = {0,0,0,0,0,0};
-uint8_t code6[CODE_LEN] = {1,1,1,1,1,1};
+uint8_t code5[CODE_LEN] = {1,1,1,1,1,1};
+//uint8_t code6[CODE_LEN] = {1,1,1,1,1,1};
 
 
 /*
@@ -98,7 +98,7 @@ void setup() {
   pinMode(TRAC_A3, OUTPUT);
   pinMode(TRAC_A4, OUTPUT);
   pinMode(TRAC_A5, OUTPUT);
-  pinMode(TRAC_A6, OUTPUT);
+  //pinMode(TRAC_A6, OUTPUT);
   pinMode(TRAC_A7, OUTPUT);
   pinMode(TRAC_A8, OUTPUT);
   pinMode(TRAC_A9, OUTPUT);
@@ -107,8 +107,8 @@ void setup() {
   digitalWrite(TRAC_A3, HIGH);
   digitalWrite(TRAC_A4, HIGH);
   digitalWrite(TRAC_A5, HIGH);
-  digitalWrite(TRAC_A6, HIGH);
-  analogWrite(TRAC_A7, 1023);
+  digitalWrite(TRAC_A7, HIGH);
+  //analogWrite(TRAC_A6, 1023);
   digitalWrite(TRAC_A8, HIGH);
   digitalWrite(TRAC_A9, HIGH);
 
@@ -223,9 +223,12 @@ if(!digitalRead(BTN_ENTER)){
     play_audio(TRAC_A4,TRAC_LEN_MS_A4);
   }else if(memcmp(cur_code, code5, sizeof(code5)) == 0){
     play_audio(TRAC_A5,TRAC_LEN_MS_A5);
-  }else if(memcmp(cur_code, code6, sizeof(code6)) == 0){
+  }
+  /*
+  else if(memcmp(cur_code, code6, sizeof(code6)) == 0){
     play_audio(TRAC_A6,TRAC_LEN_MS_A6);
   }
+  */
   else{
     code_error();
   }
