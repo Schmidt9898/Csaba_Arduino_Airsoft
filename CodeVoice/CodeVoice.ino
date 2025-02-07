@@ -7,7 +7,7 @@
 #define BTN_RESET 6
 #define BTN_ENTER 7
 
-#define LED_STATUS 8
+#define LED_STATUS 10
 
 #define BUZZER 9
 
@@ -20,6 +20,7 @@
 #define TRAC_A7 A7
 #define TRAC_A8 11
 #define TRAC_A9 12
+#define TRAC_A10 A0
 
 #define TRAC_LEN_MS_A1 4000
 #define TRAC_LEN_MS_A2 1000
@@ -30,6 +31,7 @@
 #define TRAC_LEN_MS_A7 1000
 #define TRAC_LEN_MS_A8 1000
 #define TRAC_LEN_MS_A9 300000 //5perc, 300mp, 300000 milisec
+#define TRAC_LEN_MS_A10 1000
 
 #define CODE_LEN 6
 
@@ -122,8 +124,11 @@ void setup() {
     Serial.println("Penalty cleared");
   } 
   EEPROM.get(0,penalty_time_left);
-  penalty_state();
-
+  if (penalty_time_left != 0)
+  {
+    play_audio(TRAC_A10,TRAC_LEN_MS_A10);
+    penalty_state();
+  }
 
   for(short i = 0; i < 2; i++)
   {
