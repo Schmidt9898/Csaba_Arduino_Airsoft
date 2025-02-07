@@ -18,8 +18,8 @@
 #define TRAC_A3 A3
 #define TRAC_A4 A4
 #define TRAC_A5 A5
-#define TRAC_A6 A6
-#define TRAC_A7 A7
+#define TRAC_A6 8
+#define TRAC_A7 13
 #define TRAC_A8 11
 #define TRAC_A9 12
 
