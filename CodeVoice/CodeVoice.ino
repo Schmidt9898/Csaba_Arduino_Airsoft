@@ -108,7 +108,7 @@ void setup() {
   digitalWrite(TRAC_A4, HIGH);
   digitalWrite(TRAC_A5, HIGH);
   digitalWrite(TRAC_A6, HIGH);
-  analogWrite(TRAC_A7, HIGH);
+  analogWrite(TRAC_A7, 1023);
   digitalWrite(TRAC_A8, HIGH);
   digitalWrite(TRAC_A9, HIGH);
 
@@ -144,7 +144,7 @@ void setup() {
   //play_audio(TRAC_A7,TRAC_LEN_MS_A7);
   analogWrite(TRAC_A7, 0);
   delay(100);
-  analogWrite(TRAC_A7, 1024);
+  analogWrite(TRAC_A7, 1023);
   delay(TRAC_LEN_MS_A7);
 }
 
