@@ -84,19 +84,15 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Init..");
   
-  pinMode(BUZZER, OUTPUT);
-  noTone(BUZZER);
-  beep();
-  delay(200);
-
+  
   pinMode(BTN_0, INPUT_PULLUP);
   pinMode(BTN_1, INPUT_PULLUP);
   pinMode(BTN_2, INPUT_PULLUP);
   pinMode(BTN_3, INPUT_PULLUP);
   pinMode(BTN_RESET, INPUT_PULLUP);
   pinMode(BTN_ENTER, INPUT_PULLUP);
-
-
+  
+  
   pinMode(TRAC_A1, OUTPUT);
   pinMode(TRAC_A2, OUTPUT);
   pinMode(TRAC_A3, OUTPUT);
@@ -117,9 +113,13 @@ void setup() {
   digitalWrite(TRAC_A9, HIGH);
 
   pinMode(LED_STATUS, OUTPUT);
-
+  
   digitalWrite(LED_STATUS, 1);
   
+  pinMode(BUZZER, OUTPUT);
+  noTone(BUZZER);
+  beep();
+  delay(200);
 
   if(!digitalRead(BTN_MEM_CLEAR)){
     EEPROM.write(0, 0);
