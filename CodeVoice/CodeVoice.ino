@@ -7,6 +7,8 @@
 #define BTN_RESET 6
 #define BTN_ENTER 7
 
+#define BTN_MEM_CLEAR BTN_0
+
 #define LED_STATUS 10
 
 #define BUZZER 9
@@ -21,28 +23,38 @@
 #define TRAC_A8 11
 #define TRAC_A9 12
 
-#define TRAC_LEN_MS_A1 4000
-#define TRAC_LEN_MS_A2 1000
-#define TRAC_LEN_MS_A3 1000
-#define TRAC_LEN_MS_A4 1000
-#define TRAC_LEN_MS_A5 1000
-#define TRAC_LEN_MS_A6 1000
-#define TRAC_LEN_MS_A7 1000
-#define TRAC_LEN_MS_A8 1000
-#define TRAC_LEN_MS_A9 300000 //5perc, 300mp, 300000 milisec
+#define TRAC_LEN_MS_A1 1000   // code 1
+#define TRAC_LEN_MS_A2 1000   // code 2
+#define TRAC_LEN_MS_A3 1000   // code 3
+#define TRAC_LEN_MS_A4 1000   // code 4
+#define TRAC_LEN_MS_A5 1000   // code 5
+#define TRAC_LEN_MS_A6 300000 // code 6 //5perc, 300mp, 300000 milisec
+#define TRAC_LEN_MS_A7 4000   // welcome
+#define TRAC_LEN_MS_A8 1000   // code error
+#define TRAC_LEN_MS_A9 1000   // startup penalty
 
 #define CODE_LEN 6
 
 #define PENALTY_TIME_MIN 1
 
-uint8_t penalty_time_left = 0;
+uint8_t code1[CODE_LEN] = {1,2,4,2,3,3};
+uint8_t code2[CODE_LEN] = {1,2,3,4,2,2};
+uint8_t code3[CODE_LEN] = {4,3,1,2,4,2};
+uint8_t code4[CODE_LEN] = {0,0,0,0,0,0};
+uint8_t code5[CODE_LEN] = {0,0,0,0,0,0};
+uint8_t code6[CODE_LEN] = {1,1,1,1,1,1};
 
+
+/*
+----------------------------------------------------------------
+----------------NO CHANGE AFTER THIS LINE-----------------------
+----------------------------------------------------------------
+*/
 
 void beep()
 {
   tone(BUZZER, 500, 100);
 }
-
 
 void play_audio(unsigned int pin,unsigned int duration){
   digitalWrite(pin, LOW);
@@ -51,19 +63,10 @@ void play_audio(unsigned int pin,unsigned int duration){
   delay(duration);
 }
 
+uint8_t penalty_time_left = 0;
 
 uint8_t cur_code[CODE_LEN];
 uint8_t cur_code_idx = 0;
-
-
-uint8_t code1[CODE_LEN] = {1,2,4,2,3,3};
-uint8_t code2[CODE_LEN] = {1,2,3,4,2,2};
-uint8_t code3[CODE_LEN] = {4,3,1,2,4,2};
-uint8_t code4[CODE_LEN] = {0,0,0,0,0,0};
-uint8_t code5[CODE_LEN] = {0,0,0,0,0,0};
-uint8_t code6[CODE_LEN] = {1,1,1,1,1,1};
-//uint8_t code7[CODE_LEN] = {1,1,1,1,1,1};
-
 
 void print_code(uint8_t *arr)
 {
@@ -73,8 +76,6 @@ void print_code(uint8_t *arr)
   }
   Serial.print("\n");
 }
-
-
 
 void setup() {
 
@@ -117,13 +118,14 @@ void setup() {
   digitalWrite(LED_STATUS, 1);
   
 
-  if(!digitalRead(BTN_0)){
+  if(!digitalRead(BTN_MEM_CLEAR)){
     EEPROM.write(0, 0);
     Serial.println("Penalty cleared");
   } 
   EEPROM.get(0,penalty_time_left);
   if (penalty_time_left != 0)
   {
+    // startup penalty
     play_audio(TRAC_A9,TRAC_LEN_MS_A9);
     penalty_state();
   }
@@ -136,7 +138,7 @@ void setup() {
     digitalWrite(LED_STATUS, 1);
   }
   
-  play_audio(TRAC_A1,TRAC_LEN_MS_A1);
+  play_audio(TRAC_A7,TRAC_LEN_MS_A7);
 }
 
 void penalty_state()
@@ -154,7 +156,7 @@ void penalty_state()
 
 void code_error(){
   Serial.println("code_error");
-  play_audio(TRAC_A2,TRAC_LEN_MS_A2);
+  play_audio(TRAC_A8,TRAC_LEN_MS_A8);
   penalty_time_left = PENALTY_TIME_MIN;
   EEPROM.write(0, penalty_time_left);
   Serial.print(PENALTY_TIME_MIN);
@@ -165,7 +167,6 @@ void code_error(){
 bool isChange = false;
 
 void loop() {
-
 
 if (cur_code_idx < CODE_LEN)
 {
@@ -206,23 +207,18 @@ if(!digitalRead(BTN_ENTER)){
   }
   
   if (memcmp(cur_code, code1, sizeof(code1)) == 0){
-    play_audio(TRAC_A3,TRAC_LEN_MS_A3);
+    play_audio(TRAC_A1,TRAC_LEN_MS_A1);
   }else if(memcmp(cur_code, code2, sizeof(code2)) == 0){
-    play_audio(TRAC_A4,TRAC_LEN_MS_A4);
+    play_audio(TRAC_A2,TRAC_LEN_MS_A2);
   }else if(memcmp(cur_code, code3, sizeof(code3)) == 0){
-    play_audio(TRAC_A5,TRAC_LEN_MS_A5);
+    play_audio(TRAC_A3,TRAC_LEN_MS_A3);
   }else if(memcmp(cur_code, code4, sizeof(code4)) == 0){
-    play_audio(TRAC_A6,TRAC_LEN_MS_A6);
+    play_audio(TRAC_A4,TRAC_LEN_MS_A4);
   }else if(memcmp(cur_code, code5, sizeof(code5)) == 0){
-    play_audio(TRAC_A7,TRAC_LEN_MS_A7);
+    play_audio(TRAC_A5,TRAC_LEN_MS_A5);
   }else if(memcmp(cur_code, code6, sizeof(code6)) == 0){
-    play_audio(TRAC_A8,TRAC_LEN_MS_A8);
+    play_audio(TRAC_A6,TRAC_LEN_MS_A6);
   }
-  /*
-  else if(memcmp(cur_code, code7, sizeof(code7)) == 0){
-    play_audio(TRAC_A9,TRAC_LEN_MS_A9);
-  }
-  */
   else{
     code_error();
   }
