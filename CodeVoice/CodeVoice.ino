@@ -81,6 +81,7 @@ void print_code(uint8_t *arr)
 
 void setup() {
 
+  delay(2000);
   Serial.begin(9600);
   Serial.println("Init..");
   
