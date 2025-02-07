@@ -33,7 +33,7 @@
 
 #define CODE_LEN 6
 
-#define PENALTY_TIME_MIN 0
+#define PENALTY_TIME_MIN 1
 
 uint8_t penalty_time_left = 0;
 
@@ -167,22 +167,22 @@ void loop() {
 if (cur_code_idx < CODE_LEN)
 {
 if(!digitalRead(BTN_0)){
-  cur_code[cur_code_idx++] = 0;
-  beep();
-  isChange = true;
-}
-if(!digitalRead(BTN_1)){
   cur_code[cur_code_idx++] = 1;
   beep();
   isChange = true;
 }
-if(!digitalRead(BTN_2)){
+if(!digitalRead(BTN_1)){
   cur_code[cur_code_idx++] = 2;
   beep();
   isChange = true;
 }
-if(!digitalRead(BTN_3)){
+if(!digitalRead(BTN_2)){
   cur_code[cur_code_idx++] = 3;
+  beep();
+  isChange = true;
+}
+if(!digitalRead(BTN_3)){
+  cur_code[cur_code_idx++] = 4;
   beep();
   isChange = true;
 }
@@ -193,15 +193,15 @@ if(!digitalRead(BTN_3)){
 if(!digitalRead(BTN_RESET)){
   cur_code_idx = 0;
   beep();
+  isChange = true;
 }
 if(!digitalRead(BTN_ENTER)){
   beep();
-
   if (cur_code_idx < CODE_LEN)
   {
     code_error();return;
   }
-
+  
   if (memcmp(cur_code, code1, sizeof(code1)) == 0){
     play_audio(TRAC_A3,TRAC_LEN_MS_A3);
   }else if(memcmp(cur_code, code2, sizeof(code2)) == 0){
@@ -220,6 +220,7 @@ if(!digitalRead(BTN_ENTER)){
     code_error();
   }
   cur_code_idx = 0;
+  isChange = true;
   return;
 }
 
