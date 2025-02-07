@@ -19,7 +19,7 @@
 #define TRAC_A4 A4
 #define TRAC_A5 A5
 #define TRAC_A6 8
-#define TRAC_A7 13
+#define TRAC_A7 A6
 #define TRAC_A8 11
 #define TRAC_A9 12
 
@@ -108,7 +108,7 @@ void setup() {
   digitalWrite(TRAC_A4, HIGH);
   digitalWrite(TRAC_A5, HIGH);
   digitalWrite(TRAC_A6, HIGH);
-  digitalWrite(TRAC_A7, HIGH);
+  analogWrite(TRAC_A7, HIGH);
   digitalWrite(TRAC_A8, HIGH);
   digitalWrite(TRAC_A9, HIGH);
 
@@ -141,7 +141,11 @@ void setup() {
     digitalWrite(LED_STATUS, 1);
   }
   
-  play_audio(TRAC_A7,TRAC_LEN_MS_A7);
+  //play_audio(TRAC_A7,TRAC_LEN_MS_A7);
+  analogWrite(TRAC_A7, 0);
+  delay(100);
+  analogWrite(TRAC_A7, 1024);
+  delay(TRAC_LEN_MS_A7);
 }
 
 void penalty_state()
