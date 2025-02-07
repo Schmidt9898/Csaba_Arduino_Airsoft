@@ -57,6 +57,8 @@ void beep()
 }
 
 void play_audio(unsigned int pin,unsigned int duration){
+  Serial.print("Playing audio ");
+  Serial.println(pin);
   digitalWrite(pin, LOW);
   delay(100);
   digitalWrite(pin, HIGH);
@@ -145,9 +147,9 @@ void setup() {
 void penalty_state()
 {
   Serial.println("Entering penalty state.");
-  for(penalty_time_left; penalty_time_left > 0;penalty_time_left--)
+  for(penalty_time_left; penalty_time_left > 0;)
   {
-    Serial.print(penalty_time_left);
+    Serial.print(penalty_time_left--);
     Serial.println(" minutes of penalry left");
     delay(60000);
     EEPROM.write(0, penalty_time_left);
