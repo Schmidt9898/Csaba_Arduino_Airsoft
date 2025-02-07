@@ -82,6 +82,7 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Init..");
   
+  pinMode(BUZZER, OUTPUT);
   noTone(BUZZER);
   beep();
   delay(200);
