@@ -46,7 +46,7 @@ void beep()
 
 void play_audio(unsigned int pin,unsigned int duration){
   digitalWrite(pin, LOW);
-  delay(1000);
+  delay(100);
   digitalWrite(pin, HIGH);
   delay(duration);
 }
