@@ -20,7 +20,6 @@
 #define TRAC_A7 A7
 #define TRAC_A8 11
 #define TRAC_A9 12
-#define TRAC_A10 A0
 
 #define TRAC_LEN_MS_A1 4000
 #define TRAC_LEN_MS_A2 1000
@@ -31,7 +30,6 @@
 #define TRAC_LEN_MS_A7 1000
 #define TRAC_LEN_MS_A8 1000
 #define TRAC_LEN_MS_A9 300000 //5perc, 300mp, 300000 milisec
-#define TRAC_LEN_MS_A10 1000
 
 #define CODE_LEN 6
 
@@ -63,8 +61,8 @@ uint8_t code2[CODE_LEN] = {1,2,3,4,2,2};
 uint8_t code3[CODE_LEN] = {4,3,1,2,4,2};
 uint8_t code4[CODE_LEN] = {0,0,0,0,0,0};
 uint8_t code5[CODE_LEN] = {0,0,0,0,0,0};
-uint8_t code6[CODE_LEN] = {0,0,0,0,0,0};
-uint8_t code7[CODE_LEN] = {1,1,1,1,1,1};
+uint8_t code6[CODE_LEN] = {1,1,1,1,1,1};
+//uint8_t code7[CODE_LEN] = {1,1,1,1,1,1};
 
 
 void print_code(uint8_t *arr)
@@ -126,7 +124,7 @@ void setup() {
   EEPROM.get(0,penalty_time_left);
   if (penalty_time_left != 0)
   {
-    play_audio(TRAC_A10,TRAC_LEN_MS_A10);
+    play_audio(TRAC_A9,TRAC_LEN_MS_A9);
     penalty_state();
   }
 
@@ -219,9 +217,13 @@ if(!digitalRead(BTN_ENTER)){
     play_audio(TRAC_A7,TRAC_LEN_MS_A7);
   }else if(memcmp(cur_code, code6, sizeof(code6)) == 0){
     play_audio(TRAC_A8,TRAC_LEN_MS_A8);
-  }else if(memcmp(cur_code, code7, sizeof(code7)) == 0){
+  }
+  /*
+  else if(memcmp(cur_code, code7, sizeof(code7)) == 0){
     play_audio(TRAC_A9,TRAC_LEN_MS_A9);
-  }else{
+  }
+  */
+  else{
     code_error();
   }
   cur_code_idx = 0;
